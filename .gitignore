@@ -1,0 +1,18 @@
+# Python & Virtual Environments
+venv-alerce/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary / Debug files
+output.txt
+url.txt
+lsst_payload.txt
+
+# Editor / OS settings
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

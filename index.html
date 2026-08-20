@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alertas Astronómicas ALeRCE</title>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --surface-color: #1e1e1e;
+      --text-color: #e0e0e0;
+      --accent-color: #bb86fc;
+      --border-color: #333333;
+      --header-bg: #2d2d2d;
+      --hover-bg: #2a2a2a;
+      --btn-bg: #3700b3;
+      --btn-hover: #6200ee;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    .widget-container {
+      max-width: 100%;
+      padding: 1rem;
+      box-sizing: border-box;
+      background-color: var(--surface-color);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .widget-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+
+    .widget-title h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: normal;
+      color: #ffffff;
+    }
+
+    .status-indicator {
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #03dac6;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.loading {
+      background-color: #cf6679;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from {
+        opacity: 0.4;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-group label {
+      font-size: 0.75rem;
+      color: #aaa;
+      text-transform: uppercase;
+    }
+
+    select {
+      background-color: #1a1a1a;
+      color: var(--text-color);
+      border: 1px solid #555;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    button {
+      background-color: var(--header-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    select:focus,
+    button:focus {
+      outline: 1px solid var(--accent-color);
+      border-color: var(--accent-color);
+    }
+
+    button.btn-export {
+      background-color: var(--btn-bg);
+      color: white;
+      font-weight: 600;
+      border: none;
+      transition: background-color 0.2s;
+      align-self: flex-end;
+      height: 32px;
+    }
+
+    button.btn-export:hover {
+      background-color: var(--btn-hover);
+    }
+
+    .table-container {
+      overflow-y: auto;
+      overflow-x: auto;
+      max-height: 500px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.8rem;
+    }
+
+    th,
+    td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+      /* overflow: hidden y text-overflow eliminados para no tapar iconos */
+      text-align: left;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    th {
+      background-color: var(--header-bg);
+      font-weight: 600;
+      color: #ffffff;
+      user-select: none;
+      vertical-align: top;
+      position: relative;
+    }
+
+    .sort-icon {
+      margin-left: 4px;
+      font-size: 0.8rem;
+      opacity: 0.3;
+    }
+
+    .sort-icon.active {
+      opacity: 1;
+      color: var(--accent-color);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: var(--hover-bg);
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      display: inline-block;
+    }
+
+    .badge-ztf {
+      background-color: #3700b3;
+      color: white;
+    }
+
+    .badge-lsst {
+      background-color: #018786;
+      color: white;
+    }
+
+    .badge-sn {
+      background-color: #b00020;
+      color: white;
+    }
+
+    .badge-ast {
+      background-color: #6200ee;
+      color: white;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 2rem;
+      color: #888;
+      font-style: italic;
+    }
+
+    a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Explanatory Notes */
+    .explanatory-notes {
+      font-size: 0.8rem;
+      color: #999;
+      background: var(--header-bg);
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 4px solid var(--accent-color);
+      line-height: 1.4;
+    }
+
+    .explanatory-notes p {
+      margin: 0 0 8px 0;
+    }
+
+    .explanatory-notes p:last-child {
+      margin: 0;
+    }
+
+    .explanatory-notes strong {
+      color: #ccc;
+    }
+
+    /* Fixed Input Height Reset */
+    #limitMag,
+    #coordFormat,
+    #btnExport {
+      box-sizing: border-box !important;
+      height: 28px !important;
+      margin: 0 !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="widget-container">
+
+    <div class="table-container">
+      <table id="alertsTable">
+        <colgroup>
+          <col style="width: 10%;"> <!-- Telescopio -->
+          <col style="width: 18%;"> <!-- ID Objeto -->
+          <col style="width: 15%;"> <!-- Clasificación -->
+          <col style="width: 9%;"> <!-- Magnitud -->
+          <col style="width: 9%;"> <!-- Filtro -->
+          <col style="width: 11%;"> <!-- AR -->
+          <col style="width: 11%;"> <!-- Dec -->
+          <col style="width: 17%;"> <!-- Fecha Obs -->
+        </colgroup>
+        <thead>
+          <tr>
+            <th colspan="2" style="border-bottom: none; padding-bottom: 4px; vertical-align: top;">
+              <div style="display: flex; flex-direction: column; justify-content: flex-start; height: 100%;">
+                <h2 style="margin: 0; font-size: 1.1rem; color: #ffffff; font-weight: normal; margin-bottom: 6px;">
+                  <strong>Cosmos Mataró</strong><br>
+                  Descubrimientos <span id="dateHeaderInfo" style="font-size: 0.9rem; color: #bb86fc;">recientes</span>
+                </h2>
+                <div class="status-indicator" style="margin-bottom: 2px; color: #aaa; font-size: 0.75rem;">
+                  <span class="status-dot" id="statusDot"></span>
+                  <span id="statusText">Cargando datos iniciales...</span>
+                </div>
+                <div id="recordCounts" style="font-size: 0.7rem; color: #888; padding-left: 14px;">
+                  <!-- Aquí se inyectaran los conteos de registros -->
+                </div>
+              </div>
+            </th>
+            <th style="border-bottom: none; padding-bottom: 4px; padding-top: 12px;">
+              <select id="filterClass" multiple size="4"
+                style="height: 65px; width: 100%; font-size: 0.75rem; padding: 2px;">
+                <option value="SN" selected>SN</option>
+                <option value="asteroid" selected>asteroid</option>
+                <option value="AGN">AGN</option>
+                <option value="VS">VS</option>
+                <option value="bogus">bogus</option>
+                <option value="satellite">satellite</option>
+              </select>
+              <div style="font-size: 0.65rem; color: #aaa; margin-top: 4px;">(Ctrl+Clic para múltiple)</div>
+            </th>
+            <th colspan="2"
+              style="border-bottom: none; padding-bottom: 4px; padding-top: 12px; vertical-align: middle;">
+              <div style="display: flex; align-items: center; justify-content: flex-start; gap: 4px;">
+                <span style="font-size: 0.8rem;">&le;</span>
+                <input type="number" id="limitMag" value="21" step="0.5"
+                  style="box-sizing: border-box; width: 60px; height: 28px; background-color: #1a1a1a; color: var(--text-color); border: 1px solid #555; padding: 4px; border-radius: 4px; font-family: inherit; font-size: 0.85rem;"
+                  title="&le; Límite Mag">
+              </div>
+            </th>
+            <th colspan="3"
+              style="border-bottom: none; padding-bottom: 4px; padding-top: 12px; vertical-align: middle;">
+              <div
+                style="display: flex; flex-direction: column; justify-content: center; align-items: flex-end; gap: 8px;">
+                <!-- Botón de exportación -->
+                <button class="btn-export" id="btnExport" title="Exportar vista actual a CSV"
+                  style="box-sizing: border-box; height: 28px; display: flex; align-items: center; justify-content: center; padding: 0 12px; width: 120px;">Exportar
+                  CSV</button>
+                <!-- Selector Formato Coordenadas -->
+                <select id="coordFormat"
+                  style="box-sizing: border-box; height: 28px; background-color: #1a1a1a; color: var(--text-color); border: 1px solid #555; padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.8rem; width: 120px;"
+                  title="Formato Ecuatorial">
+                  <option value="deg">Decimal (º)</option>
+                  <option value="sex">Sexagesimal</option>
+                </select>
+              </div>
+            </th>
+          </tr>
+          <!-- Fila 2: Nombres de columnas -->
+          <tr>
+            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('telescope')">Telescopio <span
+                class="sort-icon" id="sort-icon-telescope">&uarr;&darr;</span></th>
+            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('oid')">ID Objeto <span class="sort-icon"
+                id="sort-icon-oid">&uarr;&darr;</span></th>
+            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('classification')">Clasificación <span
+                class="sort-icon" id="sort-icon-classification">&uarr;&darr;</span></th>
+            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('magnitude')">Magnitud <span
+                class="sort-icon" id="sort-icon-magnitude">&uarr;&darr;</span></th>
+            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('filter')">Filtro <span class="sort-icon"
+                id="sort-icon-filter">&uarr;&darr;</span></th>
+            <th style="padding-top: 4px; cursor: pointer; text-align: right;" onclick="handleSort('ra')">AR <span
+                class="sort-icon" id="sort-icon-ra">&uarr;&darr;</span></th>
+            <th style="padding-top: 4px; cursor: pointer; text-align: right;" onclick="handleSort('dec')">Dec <span
+                class="sort-icon" id="sort-icon-dec">&uarr;&darr;</span></th>
+            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('mjd')">Fecha UTC <span
+                class="sort-icon active" id="sort-icon-mjd">&darr;</span></th>
+          </tr>
+        </thead>
+        <tbody id="alertsTableBody">
+          <tr>
+            <td colspan="8" class="no-data">Cargando alertas desde ALeRCE. Puede tardar más de un minuto.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="explanatory-notes">
+      <p><strong>Origen de los datos y filtrado local del sistema
+          <a href="https://alerce.science/" target="_blank">ALeRCE
+            Broker</a> de los telescopios Vera Rubin/LSST
+          y Zwicky Transient Facility (ZTF)</strong>
+      </p>
+      <p>Este widget evalúa inicialmente hasta 500 descubrimientos recientes por
+        cada telescopio y categoría ocurridos en los últimos 30 días. Para garantizar el rendimiento y evitar colapsar
+        los servidores, <strong>el filtrado estricto se aplica de forma local en el navegador</strong>. Esto significa
+        que el widget se queda únicamente con los 15 descubrimientos más probables para cada una de las 6 categorías en
+        ambos telescopios (procesando y guardando un máximo de 180 alertas detalladas en total). Los menús de filtrado
+        (como el límite numérico de magnitud o la selección de clase) actúan dinámicamente sobre esta muestra ya
+        almacenada en memoria, sin volver a consultar al origen. Toda referenciación astrométrica posicional es
+        <strong>ICRS (J2000)</strong>.
+      </p>
+      <p><strong>Limitaciones de LSST</strong> Actualmente, el telescopio Vera Rubin/LSST y sus pipelines de
+        procesamiento se encuentran en fase de comisionamiento oficial previo al inicio pleno. Sus datos públicos pueden
+        ser escasos o no reportarse temporalmente en el flujo del broker. Sin embargo, el widget está diseñado
+        asincrónicamente para integrarlos de manera transparente al instante en que el flujo de ALeRCE reciba las
+        transmisiones.</p>
+      <p><strong>Sobre los cometas</strong> El clasificador principal visual (<em>Stamp Classifier</em>) agrupa por
+        defecto cualquier roca espacial interplanetaria en movimiento bajo la clase estricta <code>asteroid</code>. Si
+        un cometa nuevo o en acercamiento lejano es detectado antes de formar gran coma/cola visual, la IA de ALeRCE lo
+        registrará aquí como Asteroide hasta que sea oficialmente <em>cruzado (cross-matched)</em> con el catálogo MPC
+        por los astrónomos.</p>
+      <p><strong>Glosario de clasificación</strong> <code>SN</code> (Supernova - explosión estelar), <code>AGN</code>
+        (Núcleo Galáctico Activo - agujero negro supermasivo devorando materia), <code>VS</code> (Estrella Variable -
+        estrella que cambia su brillo intrínseco).</p>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Configuration ---
+    const API_BASE_ZTF = 'https://api.alerce.online/ztf/v1/objects/';
+    const API_BASE_LSST = 'https://api-lsst.alerce.online';
+
+    // Lista de proxies CORS públicos para esquivar el bloqueo de Google Sites
+    const CORS_PROXIES = [
+      '', // Intentar llamada directa primero
+      'https://corsproxy.io/?url=',
+      'https://api.allorigins.win/raw?url='
+    ];
+    let activeProxyIndex = 0;
+
+    const REFRESH_RATE = 3 * 60 * 1000; // 3 minutes
+    const MAX_ALERT_AGE_DAYS = 30; // Descartar alertas detectadas hace más de este tiempo
+    const classMapping = {
+      'SN': { label: 'SN', badge: 'badge-sn' },
+      'asteroid': { label: 'asteroid', badge: 'badge-ast' },
+      'AGN': { label: 'AGN', badge: 'badge-ast' },
+      'VS': { label: 'VS', badge: 'badge-ast' },
+      'bogus': { label: 'bogus', badge: 'badge-ast' },
+      'satellite': { label: 'satellite', badge: 'badge-ast' }
+    };
+
+    const filterMapping = { 1: 'g', 2: 'r', 3: 'i' };
+
+    // --- State Management ---
+    // Mantenemos los datos "en crudo" en memoria para poder ordenar y filtrar sin re-consultar la API
+    let rawAlertsData = [];
+
+    // --- UI Elements ---
+    const tbody = document.getElementById('alertsTableBody');
+    const filterClass = document.getElementById('filterClass');
+    const limitMagInput = document.getElementById('limitMag');
+    const coordFormatSelect = document.getElementById('coordFormat');
+    const btnExport = document.getElementById('btnExport');
+
+    // --- Sorting State ---
+    let sortCol = 'mjd';
+    let sortAsc = false;
+
+    // --- Utility: MJD to Local Date ---
+    function formatMJD(mjd) {
+      if (!mjd) return 'Desconocida';
+      // Fórmula de MJD a Unix Timestamp: (MJD - 40587) * 86400000
+      const unixTimeMs = (mjd - 40587.0) * 86400000;
+      const date = new Date(unixTimeMs);
+
+      // Formatear a estilo europeo limpio: DD/MM/YYYY HH:MM
+      const reqOpts = {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: false
+      };
+
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+
+      const reqOptsDate = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' };
+      const reqOptsTime = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' };
+
+      const strDate = date.toLocaleDateString('es-ES', reqOptsDate);
+      const strTime = date.toLocaleTimeString('es-ES', reqOptsTime);
+
+      // Usar fecha absoluta siempre en formato UTC (el sufijo va en la cabecera)
+      return `${strDate} ${strTime}`;
+    }
+
+    // --- Utility: Coordinate Formatting ---
+    function formatRA(raDeg) {
+      if (coordFormatSelect.value === 'deg') return raDeg.toFixed(5) + '&deg;';
+
+      // Pasar a horas: 15 grados = 1 hora
+      let raH = raDeg / 15.0;
+      let h = Math.floor(raH);
+      let mStr = (raH - h) * 60.0;
+      let m = Math.floor(mStr);
+      let s = (mStr - m) * 60.0;
+
+      return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${s.toFixed(2)}s`;
+    }
+
+    function formatDec(decDeg) {
+      if (coordFormatSelect.value === 'deg') return decDeg.toFixed(5) + '&deg;';
+
+      let sign = decDeg < 0 ? '-' : '+';
+      let posDec = Math.abs(decDeg);
+      let d = Math.floor(posDec);
+      let mStr = (posDec - d) * 60.0;
+      let m = Math.floor(mStr);
+      let s = (mStr - m) * 60.0;
+
+      return `${sign}${String(d).padStart(2, '0')}&deg; ${String(m).padStart(2, '0')}' ${s.toFixed(2)}"`;
+    }
+
+    // --- Event Listeners ---
+    filterClass.addEventListener('change', renderTable);
+    limitMagInput.addEventListener('input', renderTable); // Instant filter logic
+    coordFormatSelect.addEventListener('change', renderTable);
+    btnExport.addEventListener('click', exportToCSV);
+
+    // --- Actions ---
+    function handleSort(col) {
+      if (sortCol === col) {
+        // Change direction if clicking on the same column
+        sortAsc = !sortAsc;
+      } else {
+        // Change to new column, default descending
+        sortCol = col;
+        sortAsc = false;
+      }
+
+      // Reset all arrow visuals
+      document.querySelectorAll('.sort-icon').forEach(icon => {
+        icon.innerHTML = '&uarr;&darr;';
+        icon.classList.remove('active');
+      });
+
+      // Set active arrow
+      const activeIcon = document.getElementById(`sort-icon-${col}`);
+      if (activeIcon) {
+        activeIcon.innerHTML = sortAsc ? '&uarr;' : '&darr;';
+        activeIcon.classList.add('active');
+      }
+
+      renderTable();
+    }
+    window.handleSort = handleSort;
+
+    window.copyCoordsForStellarium = function (raDeg, decDeg, el) {
+      // Stellarium acepta perfectamente el formato compacto con letras exactas (sin espacios intermedios)
+      let raH = raDeg / 15.0;
+      let rH = Math.floor(raH);
+      let rMStr = (raH - rH) * 60.0;
+      let rM = Math.floor(rMStr);
+      let rS = (rMStr - rM) * 60.0;
+      let raStr = `${rH}h${rM}m${rS.toFixed(2)}s`;
+
+      let sign = decDeg < 0 ? '-' : '+';
+      let posDec = Math.abs(decDeg);
+      let dD = Math.floor(posDec);
+      let dMStr = (posDec - dD) * 60.0;
+      let dM = Math.floor(dMStr);
+      let dS = (dMStr - dM) * 60.0;
+      let decStr = `${sign}${dD}d${dM}m${dS.toFixed(2)}s`;
+
+      // Generar comando directo para la consola de scripts de Stellarium (F12)
+      let textToCopy = `core.moveToRaDec("${raStr}", "${decStr}");`;
+
+      const onSuccess = () => {
+        const originalHtml = el.innerHTML;
+        el.innerHTML = '&#10003;'; // Check
+        el.style.color = '#00e676';
+        el.style.opacity = '1';
+        setTimeout(() => {
+          el.innerHTML = originalHtml;
+          el.style.color = '';
+          el.style.opacity = '0.7';
+        }, 1500);
+      };
+
+      // Intentar API moderna de portapapeles
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy).then(onSuccess).catch(err => {
+          console.warn("Clipboard API bloqueada, intentando fallback...", err);
+          fallbackCopyTextToClipboard(textToCopy, onSuccess);
+        });
+      } else {
+        fallbackCopyTextToClipboard(textToCopy, onSuccess);
+      }
+    };
+
+    function fallbackCopyTextToClipboard(text, onSuccess) {
+      let textArea = document.createElement("textarea");
+      textArea.value = text;
+      // Ocultar text area
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        let successful = document.execCommand('copy');
+        if (successful) onSuccess();
+      } catch (err) {
+        console.error('Fallback de copiado falló', err);
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function updateStatus(isUpdating, text = '') {
+      const dot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      if (isUpdating) {
+        dot.classList.add('loading');
+        statusText.textContent = 'Descargando y evaluando hasta 500 objetos...';
+      } else {
+        dot.classList.remove('loading');
+        statusText.textContent = text || 'Actualizado hace un momento';
+      }
+    }
+
+    // Función auxiliar para esquivar restricciones CORS y saturación de red con reintentos automáticos
+    async function fetchWithCorsProxy(url, retries = 2, delayMs = 300) {
+      // 1. Intentar llamadas directas a ALeRCE con reintentos para soportar caídas temporales o rate limits del navegador
+      if (url.includes('api.alerce.online') || url.includes('api-lsst.alerce.online')) {
+        for (let attempt = 0; attempt <= retries; attempt++) {
+          try {
+            const res = await fetch(url);
+            if (res.ok) {
+              return { ok: true, res: res };
+            }
+            if (attempt < retries) {
+              await new Promise(r => setTimeout(r, delayMs * (attempt + 1)));
+            }
+          } catch (err) {
+            console.warn(`[ALeRCE Direct Fetch Error, intento ${attempt + 1}]: ${err.message}`);
+            if (attempt < retries) {
+              await new Promise(r => setTimeout(r, delayMs * (attempt + 1)));
+            }
+          }
+        }
+      }
+
+      // 2. Si falla ALeRCE directo tras reintentos o es llamada externa, probar proxies CORS
+      for (let i = activeProxyIndex; i < CORS_PROXIES.length; i++) {
+        const proxyPrefix = CORS_PROXIES[i];
+        if (!proxyPrefix) continue; // Ya probamos direct fetch arriba
+        const targetUrl = proxyPrefix + encodeURIComponent(url);
+
+        try {
+          const res = await fetch(targetUrl);
+          if (res.ok) {
+            if (activeProxyIndex !== i) {
+              console.log(`[Proxy] Cambiando a proxy funcional: index ${i}`);
+              activeProxyIndex = i;
+            }
+            return { ok: true, res: res };
+          }
+        } catch (err) {
+          console.warn(`[Proxy] Fallo fetch con proxy index ${i} (${proxyPrefix}): ${err.message}`);
+        }
+      }
+      return { ok: false, res: null };
+    }
+
+    // Función auxiliar para procesar JSON sin perder precisión en números muy grandes (OIDs de LSST)
+    async function fetchWithBigIntOid(url) {
+      try {
+        const { ok, res } = await fetchWithCorsProxy(url);
+        if (!ok || !res) return { ok: false, data: null };
+
+        const text = await res.text();
+        const fixedText = text.replace(/"oid"\s*:\s*(\d+)/g, '"oid":"$1"');
+        return { ok: true, data: JSON.parse(fixedText) };
+      } catch (err) {
+        console.warn(`[fetchWithBigIntOid Error]: ${url}`, err);
+        return { ok: false, data: null };
+      }
+    }
+
+    async function fetchLatestMagnitude(baseUrl, surveyName, oid) {
+      // Convertir oid a string explícitamente para evitar pérdida de precisión en números tan grandes (especialmente LSST)
+      const oidStr = String(oid);
+      if (surveyName === 'ZTF') {
+        // 1. Intentar magstats extrayendo magmin (prioritario en la web oficial de ALeRCE), maglast, magmean, etc.
+        try {
+          const { ok, data: magstats } = await fetchWithBigIntOid(`${baseUrl}${oidStr}/magstats`);
+          if (ok && Array.isArray(magstats) && magstats.length > 0) {
+            let latestMagstat = null;
+            let maxMjd = -1;
+
+            magstats.forEach(ms => {
+              const msMjd = ms.lastmjd || ms.firstmjd || 0;
+              // Prioridad a magmin (el campo oficial usado por ALeRCE en sus vistas para ZTF Asteroids), maglast, magmean, etc.
+              const mag = ms.magmin ?? ms.maglast ?? ms.magmean ?? ms.magmedian ?? ms.magfirst;
+              if (msMjd >= maxMjd && mag != null) {
+                maxMjd = msMjd;
+                latestMagstat = { fid: ms.fid, mag: mag };
+              }
+            });
+
+            if (latestMagstat && latestMagstat.mag != null) {
+              return {
+                magnitude: latestMagstat.mag,
+                filter: latestMagstat.fid
+              };
+            }
+          }
+        } catch (e1) {
+          console.warn(`[ZTF magstats fail]: ${oidStr}`, e1);
+        }
+
+        // 2. Fallback a /detections si magstats falló o no devolvió ningún campo de magnitud
+        try {
+          const { ok: detOk, data: detections } = await fetchWithBigIntOid(`${baseUrl}${oidStr}/detections`);
+          if (detOk && Array.isArray(detections) && detections.length > 0) {
+            let latestMjd = -1;
+            let latestDet = null;
+
+            detections.forEach(det => {
+              const mag = det.magpsf ?? det.magap ?? det.mag;
+              if (det.mjd >= latestMjd && mag != null) {
+                latestMjd = det.mjd;
+                latestDet = det;
+              }
+            });
+
+            if (latestDet) {
+              const finalMag = latestDet.magpsf ?? latestDet.magap ?? latestDet.mag ?? null;
+              return {
+                magnitude: finalMag,
+                filter: latestDet.fid ?? null
+              };
+            }
+          }
+        } catch (e2) {
+          console.warn(`[ZTF detections fail]: ${oidStr}`, e2);
+        }
+
+        return null;
+      } else if (surveyName === 'LSST') {
+        try {
+          // LSST no tiene magstats. Buscamos en detections con oid como string puro.
+          const { ok, data: detections } = await fetchWithBigIntOid(`${baseUrl}/lightcurve_api/detections?oid=${oidStr}&survey_id=lsst`);
+          if (!ok) return null;
+          if (!detections || detections.length === 0) return null;
+
+          let latestMjd = -1;
+          let latestDet = null;
+          detections.forEach(det => {
+            // LSST utiliza psfFlux en lugar de mag en ciertas fases de preview de ALeRCE
+            const hasMag = det.mag !== undefined && det.mag !== null;
+            const hasFlux = det.psfFlux !== undefined && det.psfFlux !== null;
+
+            if (det.mjd > latestMjd && (hasMag || hasFlux)) {
+              latestMjd = det.mjd;
+              latestDet = det;
+            }
+          });
+
+          // Conversión simplificada de flujo a aprox magnitud si no hay mag real
+          let finalMag = null;
+          let finalFilter = null;
+
+          if (latestDet) {
+            // Resolver Mag
+            if (latestDet.mag !== undefined && latestDet.mag !== null) {
+              finalMag = latestDet.mag;
+            } else if (latestDet.psfFlux > 0) {
+              finalMag = -2.5 * Math.log10(latestDet.psfFlux) + 27.5;
+            }
+
+            // Resolver Filtro (LSST provee 'band' como int y un 'band_map' diccionario, o 'fid' en ZTF)
+            if (latestDet.fid) {
+              finalFilter = latestDet.fid;
+            } else if (latestDet.band_map && latestDet.band !== undefined) {
+              finalFilter = latestDet.band_map[String(latestDet.band)] || latestDet.band;
+            } else if (latestDet.band !== undefined) {
+              finalFilter = latestDet.band;
+            }
+          }
+
+          return {
+            magnitude: finalMag,
+            filter: finalFilter
+          };
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    // Formato de solo fecha
+    function formatDateOnly() {
+      const date = new Date(Date.now() - (MAX_ALERT_AGE_DAYS * 86400000));
+      return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    async function fetchAlertsForSurvey(baseUrl, surveyName, classifier, className) {
+      try {
+        let url;
+        const nowMJD = (Date.now() / 86400000) + 40587.0;
+        const cutoffMJD = nowMJD - MAX_ALERT_AGE_DAYS;
+
+        if (surveyName === 'LSST') {
+          url = `${baseUrl}/object_api/list_objects?survey=lsst&classifier=${classifier}&class=${className}&page_size=500&order_by=probability&order_mode=DESC&firstmjd=${cutoffMJD}&firstmjd=${nowMJD}`;
+        } else {
+          url = `${baseUrl}?classifier=${classifier}&class=${className}&page_size=500&order_by=probability&order_mode=DESC&firstmjd=${cutoffMJD}&firstmjd=${nowMJD}`;
+        }
+
+        const { ok, data } = await fetchWithBigIntOid(url);
+        if (!ok) return [];
+
+        const items = data.items || [];
+        let validAlerts = [];
+
+        // Filtro estricto local secundario basado en la edad (por seguridad de consistencia entre servidores)
+        let recentItems = items.filter(item => {
+          const itemMjd = item.firstmjd || 0;
+          return itemMjd >= cutoffMJD;
+        });
+
+        // Optimización de Red: Nos quedamos solo con las 15 notificaciones con mayor probabilidad confirmada
+        // para no colapsar la página ni ser bloqueados por el WAF de ALeRCE por exceso de peticiones.
+        recentItems = recentItems.slice(0, 15);
+
+        // Consultas asíncronas de magnitud para este lote específico
+        // Para evitar errores de red (CORS o net::ERR_FAILED) por lanzar 160+ peticiones a la vez,
+        // agrupamos las peticiones secundarias en lotes pequeños (ej. de 5 en 5).
+        const allMagData = [];
+        for (let i = 0; i < recentItems.length; i += 5) {
+          const chunk = recentItems.slice(i, i + 5);
+          const chunkPromises = chunk.map(item => fetchLatestMagnitude(baseUrl, surveyName, String(item.oid)));
+          const chunkResults = await Promise.all(chunkPromises);
+          allMagData.push(...chunkResults);
+          if (i + 5 < recentItems.length) {
+            await new Promise(r => setTimeout(r, 100));
+          }
+        }
+
+        recentItems.forEach((item, index) => {
+          const magData = allMagData[index];
+          const hasMag = magData && magData.magnitude !== null && magData.magnitude !== undefined;
+
+          // MJD fallback. Si viene en el root item (como ZTF/LSST list_objects) lo tomamos
+          let mjdItem = -1;
+          if (item.firstmjd) mjdItem = item.firstmjd;
+
+          validAlerts.push({
+            telescope: surveyName,
+            oid: String(item.oid),
+            classification: item.class || item.class_name || className, // Fallbacks por variaciones en response
+            magnitude: hasMag ? magData.magnitude : NaN,
+            filter: hasMag ? magData.filter : 'N/A',
+            ra: item.meanra,
+            dec: item.meandec,
+            mjd: mjdItem
+          });
+        });
+
+        return validAlerts;
+      } catch (e) {
+        console.warn(`[${surveyName}] Fallo al cargar ${className}.`, e);
+        const errorMsg = e.message || String(e);
+        // Si sigue fallando incluso con los proxies, mostramos el error
+        document.getElementById('alertsTableBody').innerHTML += `<tr><td colspan="8" style="color:#cf6679; font-size:11px;">[Red] Bloqueado ${surveyName}/${className}. Proxies agotados. Detalle: ${errorMsg}</td></tr>`;
+        return [];
+      }
+    }
+
+    async function loadData() {
+      updateStatus(true);
+
+      try {
+        // En lugar de hacer hardcode de clases en fecth, llamamos fetchAlertsForSurvey para cada clase seleccionada
+        // Esto solo aplica si queremos que la API devuelva todo, pero es mejor pedirle solo las seleccionadas 
+        // para la petición inicial, o pedir todas principales y filtrar localmente.
+
+        // Para no saturar con 12 llamadas y maximizar la efectividad en background,
+        // pediremos las 6 categorías indicadas en la interfaz de usuario.
+        const classesToFetch = ['SN', 'asteroid', 'AGN', 'VS', 'bogus', 'satellite'];
+
+        const fetchPromises = [];
+        const results = [];
+
+        // Descarga secuencial por clase para no saturar 
+        // los sockets del navegador o los proxies (evita CORS y fallos de timeout)
+        for (const cls of classesToFetch) {
+          updateStatus(true, `Consultando ZTF para ${cls}...`);
+          results.push(await fetchAlertsForSurvey(API_BASE_ZTF, 'ZTF', 'stamp_classifier', cls));
+
+          updateStatus(true, `Consultando LSST para ${cls}...`);
+          results.push(await fetchAlertsForSurvey(API_BASE_LSST, 'LSST', 'stamp_classifier_rubin_beta', cls));
+        }
+
+        // Guardamos los datos puros en el estado global eliminando duplicados (mismo objeto en varias clases)
+        const allFetched = results.flat();
+        const seen = new Set();
+        rawAlertsData = allFetched.filter(alert => {
+          const key = `${alert.telescope}-${alert.oid}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+        const ztfCount = rawAlertsData.filter(alert => alert.telescope === 'ZTF').length;
+        const lsstCount = rawAlertsData.filter(alert => alert.telescope === 'LSST').length;
+        document.getElementById('recordCounts').innerHTML = `Registros descargados: <strong>${ztfCount}</strong> ZTF | <strong>${lsstCount}</strong> LSST`;
+
+        // Actualizar título con la fecha límite de antigüedad
+        document.getElementById('dateHeaderInfo').textContent = `desde el ${formatDateOnly()}`;
+
+        renderTable();
+
+        const now = new Date();
+        updateStatus(false, `Actualizado a las ${now.toLocaleTimeString()}`);
+
+      } catch (err) {
+        console.error('Error general de actualización:', err);
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data">Error al cargar datos remotos. Reintentando en el próximo ciclo...</td></tr>';
+        updateStatus(false, 'Error de conexión');
+      }
+    }
+
+    // --- Render Logic ---
+    function renderTable() {
+      // 1. Obtener valores múltiples del select
+      const selectedClasses = Array.from(filterClass.selectedOptions).map(opt => opt.value);
+      const currentMagLimit = parseFloat(limitMagInput.value) || 21.0;
+
+      // 2. Filtrado
+      let displayData = rawAlertsData.filter(item => {
+        // Verificar si la clase del objeto está dentro de las seleccionadas
+        if (!selectedClasses.includes(item.classification)) return false;
+
+        // Filtrar por Magnitud (Si no se pudo descargar la magnitud -NaN-, no lo filtramos para no perder el objeto visualmente)
+        if (!isNaN(item.magnitude) && item.magnitude > currentMagLimit) return false;
+        return true;
+      });
+
+      // 2. Ordenación
+      const orderModifier = sortAsc ? 1 : -1;
+
+      displayData.sort((a, b) => {
+        if (a[sortCol] < b[sortCol]) return -1 * orderModifier;
+        if (a[sortCol] > b[sortCol]) return 1 * orderModifier;
+        return 0;
+      });
+
+      // 3. Dibujo HTML
+      tbody.innerHTML = '';
+      if (displayData.length === 0) {
+        const currentMagLimit = limitMagInput.value || 21;
+        tbody.innerHTML = `<tr><td colspan="8" class="no-data">No hay alertas visibles con los filtros actuales (Mag &le; ${currentMagLimit}).</td></tr>`;
+        return;
+      }
+
+      displayData.forEach(alert => {
+        const tr = document.createElement('tr');
+
+        const teleBadge = alert.telescope === 'ZTF' ? 'badge-ztf' : 'badge-lsst';
+        const classInfo = classMapping[alert.classification] || { label: alert.classification, badge: 'badge-ast' };
+        const filterName = filterMapping[alert.filter] || alert.filter;
+
+        const oidCellContent = alert.telescope === 'ZTF'
+          ? `<a href="https://alerce.online/object/${alert.oid}" target="_blank" rel="noopener noreferrer">${alert.oid}</a>`
+          : `<span title="El explorador visual de ALeRCE aún no está disponible públicamente para objetos LSST">${alert.oid}</span>`;
+
+        tr.innerHTML = `
+          <td><span class="badge ${teleBadge}">${alert.telescope}</span></td>
+          <td>${oidCellContent}</td>
+          <td><span class="badge ${classInfo.badge}">${classInfo.label}</span></td>
+          <td><strong>${isNaN(alert.magnitude) ? 'N/A' : alert.magnitude.toFixed(2)}</strong></td>
+          <td>${filterName}</td>
+          <td style="text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums;">
+            <a href="https://aladin.cds.unistra.fr/AladinLite/?target=${alert.ra}%20${alert.dec}&fov=0.1" target="_blank" rel="noopener noreferrer" style="color: var(--accent-color); text-decoration: none;" title="Abrir simulador del cielo (Aladin)">${formatRA(alert.ra)}</a>
+          </td>
+          <td style="text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums;">
+            <a href="https://aladin.cds.unistra.fr/AladinLite/?target=${alert.ra}%20${alert.dec}&fov=0.1" target="_blank" rel="noopener noreferrer" style="color: var(--accent-color); text-decoration: none;" title="Abrir simulador del cielo (Aladin)">${formatDec(alert.dec)}</a>
+            <span style="cursor:pointer; margin-left:6px; font-size:0.9rem; opacity:0.7; vertical-align: middle;" onclick="copyCoordsForStellarium(${alert.ra}, ${alert.dec}, this)" title="Copiar coordenadas juntas para pegar en buscador de Stellarium">&#128203;</span>
+          </td>
+          <td style="font-size: 0.85rem; color: #fff;">${formatMJD(alert.mjd)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- CSV Export Logic ---
+    function exportToCSV() {
+      if (rawAlertsData.length === 0) {
+        alert("No hay datos cargados para exportar.");
+        return;
+      }
+
+      // 1. Aplicamos el MISMO filtro y orden que el usuario está viendo actualmente
+      const selectedClasses = Array.from(filterClass.selectedOptions).map(opt => opt.value);
+      const currentMagLimit = parseFloat(limitMagInput.value) || 21.0;
+      const orderModifier = sortAsc ? 1 : -1;
+
+      let exportData = rawAlertsData.filter(item => {
+        if (!selectedClasses.includes(item.classification)) return false;
+        if (!isNaN(item.magnitude) && item.magnitude > currentMagLimit) return false;
+        return true;
+      });
+
+      exportData.sort((a, b) => {
+        if (a[sortCol] < b[sortCol]) return -1 * orderModifier;
+        if (a[sortCol] > b[sortCol]) return 1 * orderModifier;
+        return 0;
+      });
+
+      // 2. Generamos Cabeceras
+      let csvContent = "Telescopio,ID_Objeto,Clasificacion,Magnitud,Filtro,Ascension_Recta,Declinacion,Fecha_UTC,MJD_Bruto\n";
+
+      // 3. Poblamos las filas
+      exportData.forEach(item => {
+        const filterStr = filterMapping[item.filter] || item.filter;
+        const classStr = classMapping[item.classification] ? classMapping[item.classification].label : item.classification;
+
+        let row = [
+          item.telescope,
+          item.oid,
+          classStr,
+          isNaN(item.magnitude) ? '' : item.magnitude.toFixed(2),
+          filterStr,
+          item.ra.toFixed(6),
+          item.dec.toFixed(6),
+          formatMJD(item.mjd),
+          item.mjd.toFixed(4)
+        ];
+        csvContent += row.join(",") + "\n";
+      });
+
+      // 4. Descargamos usando un Blob
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      link.setAttribute("download", `Alerce_Alertas_${dateStr}.csv`);
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // START
+    loadData();
+  </script>
+</body>
+
+</html>
