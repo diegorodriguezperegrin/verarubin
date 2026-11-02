@@ -306,13 +306,12 @@
             <th colspan="2" style="border-bottom: none; padding-bottom: 4px; vertical-align: top;">
               <div style="display: flex; flex-direction: column; justify-content: flex-start; height: 100%;">
                 <h2 style="margin: 0; font-size: 1.1rem; color: #ffffff; font-weight: normal; margin-bottom: 6px;">
-                  <strong>Cosmos Mataró</strong>
-                  <span id="appVersionBadge" style="display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 2px 7px; border-radius: 12px; background: rgba(3, 218, 198, 0.15); color: #03dac6; border: 1px solid rgba(3, 218, 198, 0.4); vertical-align: middle; margin-left: 6px; letter-spacing: 0.3px;" title="Versión con soporte activo para Vera C. Rubin / LSST y ZTF">v1.2.0 (Rubin+ZTF)</span><br>
+                  <strong>Cosmos Mataró</strong><br>
                   Descubrimientos <span id="dateHeaderInfo" style="font-size: 0.9rem; color: #bb86fc;">recientes</span>
                 </h2>
                 <div class="status-indicator" style="margin-bottom: 2px; color: #aaa; font-size: 0.75rem;">
                   <span class="status-dot" id="statusDot"></span>
-                  <span id="statusText">Cargando v1.2.0 (Rubin + ZTF)...</span>
+                  <span id="statusText">Cargando datos iniciales...</span>
                 </div>
                 <div id="recordCounts" style="font-size: 0.7rem; color: #888; padding-left: 14px;">
                   <!-- Aquí se inyectaran los conteos de registros -->
@@ -380,7 +379,7 @@
         </thead>
         <tbody id="alertsTableBody">
           <tr>
-            <td colspan="8" class="no-data">Cargando alertas desde ALeRCE. Puede tardar más de un minuto.</td>
+            <td colspan="8" class="no-data">Cargando alertas desde ALeRCE...</td>
           </tr>
         </tbody>
       </table>
@@ -392,28 +391,24 @@
             Broker</a> de los telescopios Vera Rubin/LSST
           y Zwicky Transient Facility (ZTF)</strong>
       </p>
-      <p>Este widget evalúa inicialmente hasta 500 descubrimientos recientes por
-        cada telescopio y categoría ocurridos en los últimos 30 días. Para garantizar el rendimiento y evitar colapsar
-        los servidores, <strong>el filtrado estricto se aplica de forma local en el navegador</strong>. Esto significa
-        que el widget se queda únicamente con los 15 descubrimientos más probables para cada una de las 6 categorías en
-        ambos telescopios (procesando y guardando un máximo de 180 alertas detalladas en total). Los menús de filtrado
-        (como el límite numérico de magnitud o la selección de clase) actúan dinámicamente sobre esta muestra ya
-        almacenada en memoria, sin volver a consultar al origen. Toda referenciación astrométrica posicional es
-        <strong>ICRS (J2000)</strong>.
+      <p>Este widget evalúa hasta 500 descubrimientos en ZTF y 100 en LSST por categoría. Para garantizar el
+        rendimiento y evitar colapsar los servidores, <strong>el filtrado estricto se aplica de forma local en el
+          navegador</strong>, seleccionando los 15 descubrimientos más probables para cada una de las 6 categorías en
+        ambos telescopios (máximo de 180 alertas simultáneas). Los filtros dinámicos (como el límite de magnitud o la
+        selección de clase) actúan al instante sobre esta muestra en memoria. Toda referenciación astrométrica posicional
+        es <strong>ICRS (J2000)</strong>.
       </p>
-      <p><strong>Limitaciones de LSST</strong> Actualmente, el telescopio Vera Rubin/LSST y sus pipelines de
-        procesamiento se encuentran en fase de comisionamiento oficial previo al inicio pleno. Sus datos públicos pueden
-        ser escasos o no reportarse temporalmente en el flujo del broker. Sin embargo, el widget está diseñado
-        asincrónicamente para integrarlos de manera transparente al instante en que el flujo de ALeRCE reciba las
-        transmisiones.</p>
-      <p><strong>Sobre los cometas</strong> El clasificador principal visual (<em>Stamp Classifier</em>) agrupa por
-        defecto cualquier roca espacial interplanetaria en movimiento bajo la clase estricta <code>asteroid</code>. Si
-        un cometa nuevo o en acercamiento lejano es detectado antes de formar gran coma/cola visual, la IA de ALeRCE lo
-        registrará aquí como Asteroide hasta que sea oficialmente <em>cruzado (cross-matched)</em> con el catálogo MPC
-        por los astrónomos.</p>
+      <p><strong>Estado operativo de LSST</strong> El telescopio Vera Rubin se encuentra en fase de pruebas y
+        comisionamiento previo al inicio del sondeo rutinario. Entre campañas de observación pública, el widget muestra
+        las detecciones más recientes registradas por el broker para permitir su exploración astrométrica.</p>
+      <p><strong>Sobre los cometas</strong> El clasificador visual (<em>Stamp Classifier</em>) agrupa por defecto
+        cualquier roca interplanetaria móvil bajo la clase <code>asteroid</code> hasta su confirmación o cruce con el
+        catálogo del MPC (Minor Planet Center).</p>
       <p><strong>Glosario de clasificación</strong> <code>SN</code> (Supernova - explosión estelar), <code>AGN</code>
         (Núcleo Galáctico Activo - agujero negro supermasivo devorando materia), <code>VS</code> (Estrella Variable -
-        estrella que cambia su brillo intrínseco).</p>
+        cambio intrínseco de brillo), <code>asteroid</code> (Asteroide / Cuerpo menor del Sistema Solar),
+        <code>satellite</code> (Traza de satélite artificial), <code>bogus</code> (Falsa alarma o artefacto
+        instrumental).</p>
     </div>
 
   </div>
