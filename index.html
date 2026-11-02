@@ -4,6 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Alertas Astronómicas ALeRCE</title>
   <style>
     :root {
@@ -303,12 +306,13 @@
             <th colspan="2" style="border-bottom: none; padding-bottom: 4px; vertical-align: top;">
               <div style="display: flex; flex-direction: column; justify-content: flex-start; height: 100%;">
                 <h2 style="margin: 0; font-size: 1.1rem; color: #ffffff; font-weight: normal; margin-bottom: 6px;">
-                  <strong>Cosmos Mataró</strong><br>
+                  <strong>Cosmos Mataró</strong>
+                  <span id="appVersionBadge" style="display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 2px 7px; border-radius: 12px; background: rgba(3, 218, 198, 0.15); color: #03dac6; border: 1px solid rgba(3, 218, 198, 0.4); vertical-align: middle; margin-left: 6px; letter-spacing: 0.3px;" title="Versión con soporte activo para Vera C. Rubin / LSST y ZTF">v1.2.0 (Rubin+ZTF)</span><br>
                   Descubrimientos <span id="dateHeaderInfo" style="font-size: 0.9rem; color: #bb86fc;">recientes</span>
                 </h2>
                 <div class="status-indicator" style="margin-bottom: 2px; color: #aaa; font-size: 0.75rem;">
                   <span class="status-dot" id="statusDot"></span>
-                  <span id="statusText">Cargando datos iniciales...</span>
+                  <span id="statusText">Cargando v1.2.0 (Rubin + ZTF)...</span>
                 </div>
                 <div id="recordCounts" style="font-size: 0.7rem; color: #888; padding-left: 14px;">
                   <!-- Aquí se inyectaran los conteos de registros -->
@@ -416,6 +420,9 @@
 
   <script>
     // --- Configuration ---
+    const APP_VERSION = 'v1.2.0';
+    console.log(`%c[Cosmos Mataró] Widget ${APP_VERSION} cargado con éxito (Vera Rubin LSST + ZTF activos)`, 'background: #1e1e1e; color: #03dac6; font-weight: bold; padding: 4px 8px; border-radius: 4px; border: 1px solid #03dac6;');
+
     const API_BASE_ZTF = 'https://api.alerce.online/ztf/v1/objects/';
     const API_BASE_LSST = 'https://api-lsst.alerce.online';
 
@@ -438,7 +445,7 @@
       'satellite': { label: 'satellite', badge: 'badge-ast' }
     };
 
-    const filterMapping = { 1: 'g', 2: 'r', 3: 'i' };
+    const filterMapping = { 1: 'g', 2: 'r', 3: 'i', 4: 'z', 5: 'y', 6: 'u' };
 
     // --- State Management ---
     // Mantenemos los datos "en crudo" en memoria para poder ordenar y filtrar sin re-consultar la API
@@ -803,26 +810,46 @@
         const cutoffMJD = nowMJD - MAX_ALERT_AGE_DAYS;
 
         if (surveyName === 'LSST') {
-          url = `${baseUrl}/object_api/list_objects?survey=lsst&classifier=${classifier}&class=${className}&page_size=500&order_by=probability&order_mode=DESC&firstmjd=${cutoffMJD}&firstmjd=${nowMJD}`;
+          // Para LSST: page_size debe ser <= 200 (límite estricto de validación en FastAPI de ALeRCE). Usamos 100.
+          // Se omite firstmjd de la URL para evitar saturar la base de datos de ALeRCE con escaneos pesados.
+          url = `${baseUrl}/object_api/list_objects?survey=lsst&classifier=${classifier}&class=${className}&page_size=100&order_by=probability&order_mode=DESC`;
         } else {
           url = `${baseUrl}?classifier=${classifier}&class=${className}&page_size=500&order_by=probability&order_mode=DESC&firstmjd=${cutoffMJD}&firstmjd=${nowMJD}`;
         }
 
-        const { ok, data } = await fetchWithBigIntOid(url);
+        let { ok, data } = await fetchWithBigIntOid(url);
+
+        // Fallback para LSST: si el clasificador beta deja de responder (ej. migración a producción con stamp_classifier)
+        if (surveyName === 'LSST' && (!ok || !data || !data.items || data.items.length === 0)) {
+          if (classifier === 'stamp_classifier_rubin_beta') {
+            const fallbackUrl = `${baseUrl}/object_api/list_objects?survey=lsst&classifier=stamp_classifier&class=${className}&page_size=100&order_by=probability&order_mode=DESC`;
+            const fallbackRes = await fetchWithBigIntOid(fallbackUrl);
+            if (fallbackRes.ok && fallbackRes.data && fallbackRes.data.items && fallbackRes.data.items.length > 0) {
+              ok = true;
+              data = fallbackRes.data;
+            }
+          }
+        }
+
         if (!ok) return [];
 
         const items = data.items || [];
         let validAlerts = [];
 
-        // Filtro estricto local secundario basado en la edad (por seguridad de consistencia entre servidores)
+        // Filtro local basado en la última actividad (lastmjd) o descubrimiento (firstmjd)
         let recentItems = items.filter(item => {
-          const itemMjd = item.firstmjd || 0;
+          const itemMjd = item.lastmjd || item.firstmjd || 0;
           return itemMjd >= cutoffMJD;
         });
 
-        // Optimización de Red: Nos quedamos solo con las 15 notificaciones con mayor probabilidad confirmada
-        // para no colapsar la página ni ser bloqueados por el WAF de ALeRCE por exceso de peticiones.
-        recentItems = recentItems.slice(0, 15);
+        // Transición durante la fase de comisionamiento de LSST:
+        // Si no hay alertas en los últimos 30 días para esta categoría (por pausas entre campañas de pruebas),
+        // tomamos las más recientes disponibles del comisionamiento para que el usuario pueda visualizarlas.
+        if (surveyName === 'LSST' && recentItems.length === 0 && items.length > 0) {
+          recentItems = items.slice(0, 15);
+        } else {
+          recentItems = recentItems.slice(0, 15);
+        }
 
         // Consultas asíncronas de magnitud para este lote específico
         // Para evitar errores de red (CORS o net::ERR_FAILED) por lanzar 160+ peticiones a la vez,
@@ -842,9 +869,13 @@
           const magData = allMagData[index];
           const hasMag = magData && magData.magnitude !== null && magData.magnitude !== undefined;
 
-          // MJD fallback. Si viene en el root item (como ZTF/LSST list_objects) lo tomamos
+          // MJD: Tomamos la última fecha de actividad (lastmjd) si existe, o firstmjd como respaldo
           let mjdItem = -1;
-          if (item.firstmjd) mjdItem = item.firstmjd;
+          if (item.lastmjd) {
+            mjdItem = item.lastmjd;
+          } else if (item.firstmjd) {
+            mjdItem = item.firstmjd;
+          }
 
           validAlerts.push({
             telescope: surveyName,
@@ -913,7 +944,7 @@
         renderTable();
 
         const now = new Date();
-        updateStatus(false, `Actualizado a las ${now.toLocaleTimeString()}`);
+        updateStatus(false, `Actualizado a las ${now.toLocaleTimeString()} (${APP_VERSION})`);
 
       } catch (err) {
         console.error('Error general de actualización:', err);
