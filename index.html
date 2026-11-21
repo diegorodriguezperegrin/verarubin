@@ -155,35 +155,59 @@
       transition: all 0.2s ease;
     }
 
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-tool,
+    button.btn-export {
+      box-sizing: border-box !important;
+      height: 28px !important;
+      min-height: 28px !important;
+      max-height: 28px !important;
+      padding: 0 10px !important;
+      margin: 0 !important;
+      font-size: 0.8rem !important;
+      font-family: inherit !important;
+      line-height: 26px !important;
+      border-radius: 4px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      align-self: center !important;
+      gap: 6px;
+      transition: all 0.2s ease;
+      user-select: none;
+      vertical-align: middle !important;
+      cursor: pointer;
+    }
+
     .btn-tool {
       background-color: var(--header-bg);
       color: var(--text-color);
-      border: 1px solid var(--border-color);
-      height: 28px;
-      padding: 0 10px;
-      border-radius: 4px;
-      font-family: inherit;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      transition: all 0.2s ease;
-      box-sizing: border-box;
-      user-select: none;
+      border: 1px solid var(--border-color) !important;
     }
 
     .btn-tool:hover {
       background-color: var(--hover-bg);
-      border-color: var(--accent-color);
+      border-color: var(--accent-color) !important;
       color: var(--accent-color);
     }
 
     .btn-tool.active {
       background-color: var(--accent-color);
       color: #ffffff;
-      border-color: var(--accent-color);
+      border-color: var(--accent-color) !important;
+    }
+
+    .btn-tool svg {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+      flex-shrink: 0;
+      vertical-align: middle;
     }
 
     select:focus,
@@ -197,20 +221,13 @@
       background-color: var(--btn-bg);
       color: #ffffff;
       font-weight: 600;
-      border: none;
-      transition: background-color 0.2s;
-      align-self: flex-end;
-      height: 28px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 12px;
-      font-size: 0.8rem;
-      border-radius: 4px;
+      border: 1px solid var(--btn-bg) !important;
+      padding: 0 12px !important;
     }
 
     button.btn-export:hover {
       background-color: var(--btn-hover);
+      border-color: var(--btn-hover) !important;
     }
 
     .table-container {
@@ -417,6 +434,59 @@
       box-shadow: 0 0 6px rgba(0, 121, 107, 0.4);
     }
 
+    .toolbar-controls-right {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .coord-switch-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .segmented-switch {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 2px;
+      box-sizing: border-box;
+      height: 28px;
+    }
+
+    .seg-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-family: inherit;
+      padding: 0 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      user-select: none;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .seg-btn:hover {
+      color: var(--text-color);
+    }
+
+    .seg-btn.active {
+      background-color: var(--accent-color);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
     @media (max-width: 680px) {
       .widget-header {
         flex-direction: column;
@@ -426,16 +496,19 @@
         width: 100%;
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 8px;
         justify-content: flex-start;
       }
       .widget-toolbar {
         flex-direction: column;
         align-items: flex-start;
       }
-      .toolbar-group.mag-group {
+      .toolbar-controls-right {
         width: 100%;
-        justify-content: flex-start;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: space-between;
       }
     }
 
@@ -614,7 +687,6 @@
 
     /* Fixed Input Height Reset */
     #limitMag,
-    #coordFormat,
     #btnExport,
     .btn-tool {
       box-sizing: border-box !important;
@@ -647,7 +719,7 @@
 
         <!-- Botón de Información Estándar -->
         <button id="btnInfoToggle" class="btn-tool" type="button" title="Información y guía de uso">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="16" x2="12" y2="12"></line>
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
@@ -655,18 +727,12 @@
           <span>Info</span>
         </button>
 
-        <!-- Selector Formato Coordenadas -->
-        <select id="coordFormat" title="Formato Ecuatorial">
-          <option value="deg">Decimal (º)</option>
-          <option value="sex">Sexagesimal</option>
-        </select>
-
         <!-- Botón de exportación -->
         <button class="btn-export" id="btnExport" title="Exportar vista actual a CSV">Exportar CSV</button>
       </div>
     </div>
 
-    <!-- Barra de filtros interactivos con Chips -->
+    <!-- Barra de filtros interactivos con Chips y formato de coordenadas -->
     <div class="widget-toolbar">
       <div class="toolbar-group">
         <span class="toolbar-label">Clase:</span>
@@ -679,9 +745,18 @@
           <button type="button" class="chip" data-class="satellite" title="Satélites artificiales">Satélite</button>
         </div>
       </div>
-      <div class="toolbar-group mag-group" style="display: flex; align-items: center; gap: 6px;">
-        <label for="limitMag" class="toolbar-label">&le; Mag:</label>
-        <input type="number" id="limitMag" value="21" step="0.5" style="width: 62px;" title="&le; Límite de magnitud">
+      <div class="toolbar-controls-right">
+        <div class="coord-switch-group">
+          <span class="toolbar-label">Coord:</span>
+          <div class="segmented-switch" id="coordSwitch" title="Alternar formato de coordenadas (Decimal º / Sexagesimal)">
+            <button type="button" class="seg-btn active" data-format="deg">Decimal (º)</button>
+            <button type="button" class="seg-btn" data-format="sex">Sexagesimal</button>
+          </div>
+        </div>
+        <div class="toolbar-group mag-group" style="display: flex; align-items: center; gap: 6px;">
+          <label for="limitMag" class="toolbar-label">&le; Mag:</label>
+          <input type="number" id="limitMag" value="21" step="0.5" style="width: 58px;" title="&le; Límite de magnitud">
+        </div>
       </div>
     </div>
 
@@ -806,8 +881,43 @@
     const tbody = document.getElementById('alertsTableBody');
     const classChips = document.getElementById('classChips');
     const limitMagInput = document.getElementById('limitMag');
-    const coordFormatSelect = document.getElementById('coordFormat');
     const btnExport = document.getElementById('btnExport');
+
+    // --- Coordinate Format State (Persistent) ---
+    let currentCoordFormat = 'deg';
+    try {
+      if (localStorage.getItem('cosmos_coord_format') === 'sex') {
+        currentCoordFormat = 'sex';
+      }
+    } catch (e) {}
+
+    const coordSwitch = document.getElementById('coordSwitch');
+
+    function updateCoordSwitchUI() {
+      if (!coordSwitch) return;
+      coordSwitch.querySelectorAll('.seg-btn').forEach(btn => {
+        if (btn.dataset.format === currentCoordFormat) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    if (coordSwitch) {
+      coordSwitch.addEventListener('click', (e) => {
+        const btn = e.target.closest('.seg-btn');
+        if (!btn) return;
+        const fmt = btn.dataset.format;
+        if (fmt && fmt !== currentCoordFormat) {
+          currentCoordFormat = fmt;
+          try { localStorage.setItem('cosmos_coord_format', currentCoordFormat); } catch (e) {}
+          updateCoordSwitchUI();
+          renderTable();
+        }
+      });
+    }
+    updateCoordSwitchUI();
 
     function getSelectedClasses() {
       const activeChips = document.querySelectorAll('#classChips .chip.active');
@@ -847,7 +957,7 @@
 
     // --- Utility: Coordinate Formatting ---
     function formatRA(raDeg) {
-      if (coordFormatSelect.value === 'deg') return raDeg.toFixed(5) + '&deg;';
+      if (currentCoordFormat === 'deg') return raDeg.toFixed(5) + '&deg;';
 
       // Pasar a horas: 15 grados = 1 hora
       let raH = raDeg / 15.0;
@@ -860,7 +970,7 @@
     }
 
     function formatDec(decDeg) {
-      if (coordFormatSelect.value === 'deg') return decDeg.toFixed(5) + '&deg;';
+      if (currentCoordFormat === 'deg') return decDeg.toFixed(5) + '&deg;';
 
       let sign = decDeg < 0 ? '-' : '+';
       let posDec = Math.abs(decDeg);
@@ -880,7 +990,6 @@
       renderTable();
     });
     limitMagInput.addEventListener('input', renderTable); // Instant filter logic
-    coordFormatSelect.addEventListener('change', renderTable);
     btnExport.addEventListener('click', exportToCSV);
 
     // --- Theme Switcher Logic (#EFEDE4 <-> Negro) ---
