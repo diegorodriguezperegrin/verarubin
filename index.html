@@ -236,11 +236,156 @@
       color: white;
     }
 
+    .badge-agn {
+      background-color: #e65100;
+      color: white;
+    }
+
+    .badge-vs {
+      background-color: #0288d1;
+      color: white;
+    }
+
+    .badge-bogus {
+      background-color: #4e4e4e;
+      color: #ddd;
+    }
+
+    .badge-sat {
+      background-color: #00796b;
+      color: white;
+    }
+
+    /* Interactive Toolbar and Filter Chips */
+    .widget-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background-color: var(--header-bg);
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 0.75rem;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .toolbar-label {
+      font-size: 0.75rem;
+      color: #aaa;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-right: 2px;
+      user-select: none;
+    }
+
+    .chips-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .chip {
+      background-color: #1e1e1e;
+      color: #888;
+      border: 1px solid #444;
+      border-radius: 14px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease-in-out;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
+    .chip:hover {
+      background-color: #2c2c2c;
+      color: #eee;
+      border-color: #666;
+    }
+
+    .chip.active {
+      font-weight: 600;
+      color: #ffffff;
+      border-color: transparent;
+    }
+
+    .chip[data-class="SN"].active {
+      background-color: #b00020;
+      box-shadow: 0 0 6px rgba(176, 0, 32, 0.4);
+    }
+
+    .chip[data-class="asteroid"].active {
+      background-color: #6200ee;
+      box-shadow: 0 0 6px rgba(98, 0, 238, 0.4);
+    }
+
+    .chip[data-class="AGN"].active {
+      background-color: #e65100;
+      box-shadow: 0 0 6px rgba(230, 81, 0, 0.4);
+    }
+
+    .chip[data-class="VS"].active {
+      background-color: #0288d1;
+      box-shadow: 0 0 6px rgba(2, 136, 209, 0.4);
+    }
+
+    .chip[data-class="bogus"].active {
+      background-color: #4e4e4e;
+    }
+
+    .chip[data-class="satellite"].active {
+      background-color: #00796b;
+      box-shadow: 0 0 6px rgba(0, 121, 107, 0.4);
+    }
+
+    @media (max-width: 680px) {
+      .widget-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-right {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+      .widget-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .toolbar-group.mag-group {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+
     .no-data {
       text-align: center;
       padding: 2rem;
       color: #888;
       font-style: italic;
+    }
+
+    .mag-loading {
+      color: #777;
+      font-style: italic;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      display: inline-block;
+      animation: pulse 1s infinite alternate;
     }
 
     a {
@@ -289,6 +434,48 @@
 <body>
   <div class="widget-container">
 
+    <!-- Header superior: Título, estado y acciones -->
+    <div class="widget-header">
+      <div class="header-left">
+        <h2 style="margin: 0; font-size: 1.15rem; color: #ffffff; font-weight: normal;">
+          <strong>Cosmos Mataró</strong> &bull; Descubrimientos <span id="dateHeaderInfo" style="font-size: 0.95rem; color: #bb86fc;">recientes</span>
+        </h2>
+        <div class="status-indicator">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Cargando datos iniciales...</span>
+          <span id="recordCounts" style="color: #888; font-size: 0.75rem; margin-left: 6px;"></span>
+        </div>
+      </div>
+      <div class="header-right">
+        <!-- Selector Formato Coordenadas -->
+        <select id="coordFormat" title="Formato Ecuatorial" style="height: 28px; background-color: #1a1a1a; color: var(--text-color); border: 1px solid #555; padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.8rem;">
+          <option value="deg">Decimal (º)</option>
+          <option value="sex">Sexagesimal</option>
+        </select>
+        <!-- Botón de exportación -->
+        <button class="btn-export" id="btnExport" title="Exportar vista actual a CSV" style="height: 28px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; font-size: 0.8rem;">Exportar CSV</button>
+      </div>
+    </div>
+
+    <!-- Barra de filtros interactivos con Chips -->
+    <div class="widget-toolbar">
+      <div class="toolbar-group">
+        <span class="toolbar-label">Clase:</span>
+        <div class="chips-group" id="classChips">
+          <button type="button" class="chip active" data-class="SN" title="Supernovas">SN</button>
+          <button type="button" class="chip active" data-class="asteroid" title="Asteroides / Cuerpos menores">Asteroide</button>
+          <button type="button" class="chip" data-class="AGN" title="Núcleos Galácticos Activos">AGN</button>
+          <button type="button" class="chip" data-class="VS" title="Estrellas Variables">VS</button>
+          <button type="button" class="chip" data-class="bogus" title="Falsa alarma o artefacto">Bogus</button>
+          <button type="button" class="chip" data-class="satellite" title="Satélites artificiales">Satélite</button>
+        </div>
+      </div>
+      <div class="toolbar-group mag-group" style="display: flex; align-items: center; gap: 6px;">
+        <label for="limitMag" class="toolbar-label">&le; Mag:</label>
+        <input type="number" id="limitMag" value="21" step="0.5" style="box-sizing: border-box; width: 62px; height: 28px; background-color: #1a1a1a; color: var(--text-color); border: 1px solid #555; padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.85rem;" title="&le; Límite de magnitud">
+      </div>
+    </div>
+
     <div class="table-container">
       <table id="alertsTable">
         <colgroup>
@@ -303,77 +490,21 @@
         </colgroup>
         <thead>
           <tr>
-            <th colspan="2" style="border-bottom: none; padding-bottom: 4px; vertical-align: top;">
-              <div style="display: flex; flex-direction: column; justify-content: flex-start; height: 100%;">
-                <h2 style="margin: 0; font-size: 1.1rem; color: #ffffff; font-weight: normal; margin-bottom: 6px;">
-                  <strong>Cosmos Mataró</strong><br>
-                  Descubrimientos <span id="dateHeaderInfo" style="font-size: 0.9rem; color: #bb86fc;">recientes</span>
-                </h2>
-                <div class="status-indicator" style="margin-bottom: 2px; color: #aaa; font-size: 0.75rem;">
-                  <span class="status-dot" id="statusDot"></span>
-                  <span id="statusText">Cargando datos iniciales...</span>
-                </div>
-                <div id="recordCounts" style="font-size: 0.7rem; color: #888; padding-left: 14px;">
-                  <!-- Aquí se inyectaran los conteos de registros -->
-                </div>
-              </div>
-            </th>
-            <th style="border-bottom: none; padding-bottom: 4px; padding-top: 12px;">
-              <select id="filterClass" multiple size="4"
-                style="height: 65px; width: 100%; font-size: 0.75rem; padding: 2px;">
-                <option value="SN" selected>SN</option>
-                <option value="asteroid" selected>asteroid</option>
-                <option value="AGN">AGN</option>
-                <option value="VS">VS</option>
-                <option value="bogus">bogus</option>
-                <option value="satellite">satellite</option>
-              </select>
-              <div style="font-size: 0.65rem; color: #aaa; margin-top: 4px;">(Ctrl+Clic para múltiple)</div>
-            </th>
-            <th colspan="2"
-              style="border-bottom: none; padding-bottom: 4px; padding-top: 12px; vertical-align: middle;">
-              <div style="display: flex; align-items: center; justify-content: flex-start; gap: 4px;">
-                <span style="font-size: 0.8rem;">&le;</span>
-                <input type="number" id="limitMag" value="21" step="0.5"
-                  style="box-sizing: border-box; width: 60px; height: 28px; background-color: #1a1a1a; color: var(--text-color); border: 1px solid #555; padding: 4px; border-radius: 4px; font-family: inherit; font-size: 0.85rem;"
-                  title="&le; Límite Mag">
-              </div>
-            </th>
-            <th colspan="3"
-              style="border-bottom: none; padding-bottom: 4px; padding-top: 12px; vertical-align: middle;">
-              <div
-                style="display: flex; flex-direction: column; justify-content: center; align-items: flex-end; gap: 8px;">
-                <!-- Botón de exportación -->
-                <button class="btn-export" id="btnExport" title="Exportar vista actual a CSV"
-                  style="box-sizing: border-box; height: 28px; display: flex; align-items: center; justify-content: center; padding: 0 12px; width: 120px;">Exportar
-                  CSV</button>
-                <!-- Selector Formato Coordenadas -->
-                <select id="coordFormat"
-                  style="box-sizing: border-box; height: 28px; background-color: #1a1a1a; color: var(--text-color); border: 1px solid #555; padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.8rem; width: 120px;"
-                  title="Formato Ecuatorial">
-                  <option value="deg">Decimal (º)</option>
-                  <option value="sex">Sexagesimal</option>
-                </select>
-              </div>
-            </th>
-          </tr>
-          <!-- Fila 2: Nombres de columnas -->
-          <tr>
-            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('telescope')">Telescopio <span
+            <th style="padding-top: 6px; cursor: pointer;" onclick="handleSort('telescope')">Telescopio <span
                 class="sort-icon" id="sort-icon-telescope">&uarr;&darr;</span></th>
-            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('oid')">ID Objeto <span class="sort-icon"
+            <th style="padding-top: 6px; cursor: pointer;" onclick="handleSort('oid')">ID Objeto <span class="sort-icon"
                 id="sort-icon-oid">&uarr;&darr;</span></th>
-            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('classification')">Clasificación <span
+            <th style="padding-top: 6px; cursor: pointer;" onclick="handleSort('classification')">Clasificación <span
                 class="sort-icon" id="sort-icon-classification">&uarr;&darr;</span></th>
-            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('magnitude')">Magnitud <span
+            <th style="padding-top: 6px; cursor: pointer;" onclick="handleSort('magnitude')">Magnitud <span
                 class="sort-icon" id="sort-icon-magnitude">&uarr;&darr;</span></th>
-            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('filter')">Filtro <span class="sort-icon"
+            <th style="padding-top: 6px; cursor: pointer;" onclick="handleSort('filter')">Filtro <span class="sort-icon"
                 id="sort-icon-filter">&uarr;&darr;</span></th>
-            <th style="padding-top: 4px; cursor: pointer; text-align: right;" onclick="handleSort('ra')">AR <span
+            <th style="padding-top: 6px; cursor: pointer; text-align: right;" onclick="handleSort('ra')">AR <span
                 class="sort-icon" id="sort-icon-ra">&uarr;&darr;</span></th>
-            <th style="padding-top: 4px; cursor: pointer; text-align: right;" onclick="handleSort('dec')">Dec <span
+            <th style="padding-top: 6px; cursor: pointer; text-align: right;" onclick="handleSort('dec')">Dec <span
                 class="sort-icon" id="sort-icon-dec">&uarr;&darr;</span></th>
-            <th style="padding-top: 4px; cursor: pointer;" onclick="handleSort('mjd')">Fecha UTC <span
+            <th style="padding-top: 6px; cursor: pointer;" onclick="handleSort('mjd')">Fecha UTC <span
                 class="sort-icon active" id="sort-icon-mjd">&darr;</span></th>
           </tr>
         </thead>
@@ -415,8 +546,8 @@
 
   <script>
     // --- Configuration ---
-    const APP_VERSION = 'v1.2.0';
-    console.log(`%c[Cosmos Mataró] Widget ${APP_VERSION} cargado con éxito (Vera Rubin LSST + ZTF activos)`, 'background: #1e1e1e; color: #03dac6; font-weight: bold; padding: 4px 8px; border-radius: 4px; border: 1px solid #03dac6;');
+    const APP_VERSION = 'v1.3.0';
+    console.log(`%c[Cosmos Mataró] Widget ${APP_VERSION} cargado con éxito (Carga progresiva activa: Vera Rubin LSST + ZTF)`, 'background: #1e1e1e; color: #03dac6; font-weight: bold; padding: 4px 8px; border-radius: 4px; border: 1px solid #03dac6;');
 
     const API_BASE_ZTF = 'https://api.alerce.online/ztf/v1/objects/';
     const API_BASE_LSST = 'https://api-lsst.alerce.online';
@@ -434,10 +565,10 @@
     const classMapping = {
       'SN': { label: 'SN', badge: 'badge-sn' },
       'asteroid': { label: 'asteroid', badge: 'badge-ast' },
-      'AGN': { label: 'AGN', badge: 'badge-ast' },
-      'VS': { label: 'VS', badge: 'badge-ast' },
-      'bogus': { label: 'bogus', badge: 'badge-ast' },
-      'satellite': { label: 'satellite', badge: 'badge-ast' }
+      'AGN': { label: 'AGN', badge: 'badge-agn' },
+      'VS': { label: 'VS', badge: 'badge-vs' },
+      'bogus': { label: 'bogus', badge: 'badge-bogus' },
+      'satellite': { label: 'satellite', badge: 'badge-sat' }
     };
 
     const filterMapping = { 1: 'g', 2: 'r', 3: 'i', 4: 'z', 5: 'y', 6: 'u' };
@@ -445,13 +576,21 @@
     // --- State Management ---
     // Mantenemos los datos "en crudo" en memoria para poder ordenar y filtrar sin re-consultar la API
     let rawAlertsData = [];
+    let currentLoadSession = 0;
+    let totalMagCount = 0;
+    let completedMagCount = 0;
 
     // --- UI Elements ---
     const tbody = document.getElementById('alertsTableBody');
-    const filterClass = document.getElementById('filterClass');
+    const classChips = document.getElementById('classChips');
     const limitMagInput = document.getElementById('limitMag');
     const coordFormatSelect = document.getElementById('coordFormat');
     const btnExport = document.getElementById('btnExport');
+
+    function getSelectedClasses() {
+      const activeChips = document.querySelectorAll('#classChips .chip.active');
+      return Array.from(activeChips).map(chip => chip.dataset.class);
+    }
 
     // --- Sorting State ---
     let sortCol = 'mjd';
@@ -512,7 +651,12 @@
     }
 
     // --- Event Listeners ---
-    filterClass.addEventListener('change', renderTable);
+    classChips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      chip.classList.toggle('active');
+      renderTable();
+    });
     limitMagInput.addEventListener('input', renderTable); // Instant filter logic
     coordFormatSelect.addEventListener('change', renderTable);
     btnExport.addEventListener('click', exportToCSV);
@@ -613,7 +757,7 @@
       const statusText = document.getElementById('statusText');
       if (isUpdating) {
         dot.classList.add('loading');
-        statusText.textContent = 'Descargando y evaluando hasta 500 objetos...';
+        statusText.textContent = text || 'Descargando y evaluando objetos...';
       } else {
         dot.classList.remove('loading');
         statusText.textContent = text || 'Actualizado hace un momento';
@@ -846,25 +990,8 @@
           recentItems = recentItems.slice(0, 15);
         }
 
-        // Consultas asíncronas de magnitud para este lote específico
-        // Para evitar errores de red (CORS o net::ERR_FAILED) por lanzar 160+ peticiones a la vez,
-        // agrupamos las peticiones secundarias en lotes pequeños (ej. de 5 en 5).
-        const allMagData = [];
-        for (let i = 0; i < recentItems.length; i += 5) {
-          const chunk = recentItems.slice(i, i + 5);
-          const chunkPromises = chunk.map(item => fetchLatestMagnitude(baseUrl, surveyName, String(item.oid)));
-          const chunkResults = await Promise.all(chunkPromises);
-          allMagData.push(...chunkResults);
-          if (i + 5 < recentItems.length) {
-            await new Promise(r => setTimeout(r, 100));
-          }
-        }
-
-        recentItems.forEach((item, index) => {
-          const magData = allMagData[index];
-          const hasMag = magData && magData.magnitude !== null && magData.magnitude !== undefined;
-
-          // MJD: Tomamos la última fecha de actividad (lastmjd) si existe, o firstmjd como respaldo
+        // Construir datos básicos inmediatamente (sin bloquear esperando a peticiones de magnitud)
+        return recentItems.map(item => {
           let mjdItem = -1;
           if (item.lastmjd) {
             mjdItem = item.lastmjd;
@@ -872,74 +999,184 @@
             mjdItem = item.firstmjd;
           }
 
-          validAlerts.push({
+          return {
             telescope: surveyName,
             oid: String(item.oid),
             classification: item.class || item.class_name || className, // Fallbacks por variaciones en response
-            magnitude: hasMag ? magData.magnitude : NaN,
-            filter: hasMag ? magData.filter : 'N/A',
+            magnitude: null,
+            filter: null,
+            magLoading: true,
             ra: item.meanra,
             dec: item.meandec,
-            mjd: mjdItem
-          });
+            mjd: mjdItem,
+            baseUrl: baseUrl
+          };
         });
-
-        return validAlerts;
       } catch (e) {
         console.warn(`[${surveyName}] Fallo al cargar ${className}.`, e);
-        const errorMsg = e.message || String(e);
-        // Si sigue fallando incluso con los proxies, mostramos el error
-        document.getElementById('alertsTableBody').innerHTML += `<tr><td colspan="8" style="color:#cf6679; font-size:11px;">[Red] Bloqueado ${surveyName}/${className}. Proxies agotados. Detalle: ${errorMsg}</td></tr>`;
         return [];
       }
     }
 
-    async function loadData() {
-      updateStatus(true);
+    // --- Background Magnitude Hydration Queue ---
+    let magQueue = [];
+    let isHydrating = false;
 
-      try {
-        // En lugar de hacer hardcode de clases en fecth, llamamos fetchAlertsForSurvey para cada clase seleccionada
-        // Esto solo aplica si queremos que la API devuelva todo, pero es mejor pedirle solo las seleccionadas 
-        // para la petición inicial, o pedir todas principales y filtrar localmente.
+    function enqueueAlertsForMagnitudes(alerts, sessionId) {
+      magQueue.push(...alerts);
+      totalMagCount += alerts.length;
+      if (!isHydrating) {
+        processMagQueue(sessionId);
+      }
+    }
 
-        // Para no saturar con 12 llamadas y maximizar la efectividad en background,
-        // pediremos las 6 categorías indicadas en la interfaz de usuario.
-        const classesToFetch = ['SN', 'asteroid', 'AGN', 'VS', 'bogus', 'satellite'];
+    async function processMagQueue(sessionId) {
+      if (isHydrating) return;
+      isHydrating = true;
 
-        const fetchPromises = [];
-        const results = [];
-
-        // Descarga secuencial por clase para no saturar 
-        // los sockets del navegador o los proxies (evita CORS y fallos de timeout)
-        for (const cls of classesToFetch) {
-          updateStatus(true, `Consultando ZTF para ${cls}...`);
-          results.push(await fetchAlertsForSurvey(API_BASE_ZTF, 'ZTF', 'stamp_classifier', cls));
-
-          updateStatus(true, `Consultando LSST para ${cls}...`);
-          results.push(await fetchAlertsForSurvey(API_BASE_LSST, 'LSST', 'stamp_classifier_rubin_beta', cls));
+      const chunkSize = 4; // Procesar en bloques de 4 para no saturar ALeRCE ni los proxies
+      while (magQueue.length > 0) {
+        if (sessionId !== currentLoadSession) {
+          magQueue = [];
+          isHydrating = false;
+          return;
         }
 
-        // Guardamos los datos puros en el estado global eliminando duplicados (mismo objeto en varias clases)
-        const allFetched = results.flat();
-        const seen = new Set();
-        rawAlertsData = allFetched.filter(alert => {
-          const key = `${alert.telescope}-${alert.oid}`;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
+        const chunk = magQueue.splice(0, chunkSize);
+        await Promise.all(chunk.map(async alert => {
+          try {
+            const magData = await fetchLatestMagnitude(alert.baseUrl, alert.telescope, alert.oid);
+            if (sessionId !== currentLoadSession) return;
 
-        const ztfCount = rawAlertsData.filter(alert => alert.telescope === 'ZTF').length;
-        const lsstCount = rawAlertsData.filter(alert => alert.telescope === 'LSST').length;
-        document.getElementById('recordCounts').innerHTML = `Registros descargados: <strong>${ztfCount}</strong> ZTF | <strong>${lsstCount}</strong> LSST`;
+            alert.magLoading = false;
+            if (magData && magData.magnitude !== null && magData.magnitude !== undefined) {
+              alert.magnitude = magData.magnitude;
+              alert.filter = magData.filter;
+            } else {
+              alert.magnitude = NaN;
+              alert.filter = 'N/A';
+            }
 
-        // Actualizar título con la fecha límite de antigüedad
-        document.getElementById('dateHeaderInfo').textContent = `desde el ${formatDateOnly()}`;
+            // Actualizar celda individual en el DOM en vivo
+            updateCellInDOM(alert);
+          } catch (err) {
+            console.warn(`[Hydrate Mag Error] ${alert.oid}:`, err);
+            alert.magLoading = false;
+            alert.magnitude = NaN;
+            alert.filter = 'N/A';
+            updateCellInDOM(alert);
+          }
+        }));
 
-        renderTable();
+        completedMagCount += chunk.length;
+        if (sessionId === currentLoadSession) {
+          updateMagProgressStatus();
+        }
 
+        // Pequeño retardo entre bloques para cortesía de red
+        if (magQueue.length > 0) {
+          await new Promise(r => setTimeout(r, 60));
+        }
+      }
+
+      isHydrating = false;
+      if (sessionId === currentLoadSession && completedMagCount >= totalMagCount) {
         const now = new Date();
         updateStatus(false, `Actualizado a las ${now.toLocaleTimeString()} (${APP_VERSION})`);
+      }
+    }
+
+    function updateMagProgressStatus() {
+      const statusText = document.getElementById('statusText');
+      if (completedMagCount < totalMagCount) {
+        statusText.textContent = `Descargando magnitudes (${completedMagCount}/${totalMagCount})...`;
+      }
+    }
+
+    function updateCellInDOM(alert) {
+      const cellMag = document.getElementById(`mag-${alert.telescope}-${alert.oid}`);
+      const cellFilter = document.getElementById(`filter-${alert.telescope}-${alert.oid}`);
+      const row = document.getElementById(`row-${alert.telescope}-${alert.oid}`);
+
+      const currentMagLimit = parseFloat(limitMagInput.value) || 21.0;
+      if (!isNaN(alert.magnitude) && alert.magnitude !== null && alert.magnitude > currentMagLimit) {
+        if (row) {
+          row.style.display = 'none';
+        }
+        return;
+      }
+
+      if (cellMag) {
+        cellMag.innerHTML = `<strong>${isNaN(alert.magnitude) || alert.magnitude === null ? 'N/A' : alert.magnitude.toFixed(2)}</strong>`;
+      }
+      if (cellFilter) {
+        const filterName = filterMapping[alert.filter] || alert.filter || 'N/A';
+        cellFilter.textContent = filterName;
+      }
+    }
+
+    async function loadData() {
+      currentLoadSession++;
+      const session = currentLoadSession;
+      totalMagCount = 0;
+      completedMagCount = 0;
+      magQueue = [];
+      isHydrating = false;
+      rawAlertsData = [];
+
+      updateStatus(true, 'Descubriendo alertas recientes...');
+      document.getElementById('dateHeaderInfo').textContent = `desde el ${formatDateOnly()}`;
+
+      try {
+        const classesToFetch = ['SN', 'asteroid', 'AGN', 'VS', 'bogus', 'satellite'];
+        const seen = new Set();
+
+        for (const cls of classesToFetch) {
+          if (session !== currentLoadSession) return;
+
+          updateStatus(true, `Consultando ${cls} (ZTF y LSST)...`);
+
+          // Consultar ZTF y LSST en paralelo para esta categoría
+          const [ztfAlerts, lsstAlerts] = await Promise.all([
+            fetchAlertsForSurvey(API_BASE_ZTF, 'ZTF', 'stamp_classifier', cls),
+            fetchAlertsForSurvey(API_BASE_LSST, 'LSST', 'stamp_classifier_rubin_beta', cls)
+          ]);
+
+          if (session !== currentLoadSession) return;
+
+          const newAlerts = [...ztfAlerts, ...lsstAlerts].filter(alert => {
+            const key = `${alert.telescope}-${alert.oid}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+
+          if (newAlerts.length > 0) {
+            rawAlertsData.push(...newAlerts);
+
+            const ztfCount = rawAlertsData.filter(alert => alert.telescope === 'ZTF').length;
+            const lsstCount = rawAlertsData.filter(alert => alert.telescope === 'LSST').length;
+            document.getElementById('recordCounts').innerHTML = `Registros descargados: <strong>${ztfCount}</strong> ZTF | <strong>${lsstCount}</strong> LSST`;
+
+            // RENDER INMEDIATO: El usuario ve los datos básicos enseguida
+            renderTable();
+
+            // Encolar hidratación de magnitudes en segundo plano
+            enqueueAlertsForMagnitudes(newAlerts, session);
+          }
+        }
+
+        if (session === currentLoadSession) {
+          if (rawAlertsData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="no-data">No se encontraron alertas recientes en ALeRCE.</td></tr>';
+            updateStatus(false, 'Sin alertas recientes');
+          } else if (completedMagCount >= totalMagCount) {
+            const now = new Date();
+            updateStatus(false, `Actualizado a las ${now.toLocaleTimeString()} (${APP_VERSION})`);
+          } else {
+            updateMagProgressStatus();
+          }
+        }
 
       } catch (err) {
         console.error('Error general de actualización:', err);
@@ -950,30 +1187,35 @@
 
     // --- Render Logic ---
     function renderTable() {
-      // 1. Obtener valores múltiples del select
-      const selectedClasses = Array.from(filterClass.selectedOptions).map(opt => opt.value);
+      // 1. Obtener valores de los chips activos
+      const selectedClasses = getSelectedClasses();
       const currentMagLimit = parseFloat(limitMagInput.value) || 21.0;
 
-      // 2. Filtrado
+      // 2. Filtrado (los que aún están cargando su magnitud se muestran para no perder visibilidad)
       let displayData = rawAlertsData.filter(item => {
-        // Verificar si la clase del objeto está dentro de las seleccionadas
         if (!selectedClasses.includes(item.classification)) return false;
-
-        // Filtrar por Magnitud (Si no se pudo descargar la magnitud -NaN-, no lo filtramos para no perder el objeto visualmente)
-        if (!isNaN(item.magnitude) && item.magnitude > currentMagLimit) return false;
+        if (!item.magLoading && !isNaN(item.magnitude) && item.magnitude !== null && item.magnitude > currentMagLimit) return false;
         return true;
       });
 
-      // 2. Ordenación
+      // 3. Ordenación
       const orderModifier = sortAsc ? 1 : -1;
 
       displayData.sort((a, b) => {
-        if (a[sortCol] < b[sortCol]) return -1 * orderModifier;
-        if (a[sortCol] > b[sortCol]) return 1 * orderModifier;
+        let valA = a[sortCol];
+        let valB = b[sortCol];
+
+        if (sortCol === 'magnitude') {
+          valA = (valA === null || isNaN(valA)) ? 999 : valA;
+          valB = (valB === null || isNaN(valB)) ? 999 : valB;
+        }
+
+        if (valA < valB) return -1 * orderModifier;
+        if (valA > valB) return 1 * orderModifier;
         return 0;
       });
 
-      // 3. Dibujo HTML
+      // 4. Dibujo HTML
       tbody.innerHTML = '';
       if (displayData.length === 0) {
         const currentMagLimit = limitMagInput.value || 21;
@@ -983,21 +1225,32 @@
 
       displayData.forEach(alert => {
         const tr = document.createElement('tr');
+        tr.id = `row-${alert.telescope}-${alert.oid}`;
 
         const teleBadge = alert.telescope === 'ZTF' ? 'badge-ztf' : 'badge-lsst';
         const classInfo = classMapping[alert.classification] || { label: alert.classification, badge: 'badge-ast' };
-        const filterName = filterMapping[alert.filter] || alert.filter;
+        const filterName = filterMapping[alert.filter] || alert.filter || '-';
 
         const oidCellContent = alert.telescope === 'ZTF'
           ? `<a href="https://alerce.online/object/${alert.oid}" target="_blank" rel="noopener noreferrer">${alert.oid}</a>`
           : `<span title="El explorador visual de ALeRCE aún no está disponible públicamente para objetos LSST">${alert.oid}</span>`;
 
+        let magDisplay;
+        let filterDisplay;
+        if (alert.magLoading) {
+          magDisplay = `<span class="mag-loading" title="Obteniendo magnitud...">...</span>`;
+          filterDisplay = `<span class="mag-loading" title="Obteniendo filtro...">-</span>`;
+        } else {
+          magDisplay = `<strong>${isNaN(alert.magnitude) || alert.magnitude === null ? 'N/A' : alert.magnitude.toFixed(2)}</strong>`;
+          filterDisplay = filterName;
+        }
+
         tr.innerHTML = `
           <td><span class="badge ${teleBadge}">${alert.telescope}</span></td>
           <td>${oidCellContent}</td>
           <td><span class="badge ${classInfo.badge}">${classInfo.label}</span></td>
-          <td><strong>${isNaN(alert.magnitude) ? 'N/A' : alert.magnitude.toFixed(2)}</strong></td>
-          <td>${filterName}</td>
+          <td id="mag-${alert.telescope}-${alert.oid}">${magDisplay}</td>
+          <td id="filter-${alert.telescope}-${alert.oid}">${filterDisplay}</td>
           <td style="text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums;">
             <a href="https://aladin.cds.unistra.fr/AladinLite/?target=${alert.ra}%20${alert.dec}&fov=0.1" target="_blank" rel="noopener noreferrer" style="color: var(--accent-color); text-decoration: none;" title="Abrir simulador del cielo (Aladin)">${formatRA(alert.ra)}</a>
           </td>
@@ -1019,19 +1272,25 @@
       }
 
       // 1. Aplicamos el MISMO filtro y orden que el usuario está viendo actualmente
-      const selectedClasses = Array.from(filterClass.selectedOptions).map(opt => opt.value);
+      const selectedClasses = getSelectedClasses();
       const currentMagLimit = parseFloat(limitMagInput.value) || 21.0;
       const orderModifier = sortAsc ? 1 : -1;
 
       let exportData = rawAlertsData.filter(item => {
         if (!selectedClasses.includes(item.classification)) return false;
-        if (!isNaN(item.magnitude) && item.magnitude > currentMagLimit) return false;
+        if (!item.magLoading && !isNaN(item.magnitude) && item.magnitude !== null && item.magnitude > currentMagLimit) return false;
         return true;
       });
 
       exportData.sort((a, b) => {
-        if (a[sortCol] < b[sortCol]) return -1 * orderModifier;
-        if (a[sortCol] > b[sortCol]) return 1 * orderModifier;
+        let valA = a[sortCol];
+        let valB = b[sortCol];
+        if (sortCol === 'magnitude') {
+          valA = (valA === null || isNaN(valA)) ? 999 : valA;
+          valB = (valB === null || isNaN(valB)) ? 999 : valB;
+        }
+        if (valA < valB) return -1 * orderModifier;
+        if (valA > valB) return 1 * orderModifier;
         return 0;
       });
 
@@ -1040,14 +1299,15 @@
 
       // 3. Poblamos las filas
       exportData.forEach(item => {
-        const filterStr = filterMapping[item.filter] || item.filter;
+        const filterStr = filterMapping[item.filter] || item.filter || '';
         const classStr = classMapping[item.classification] ? classMapping[item.classification].label : item.classification;
+        const magStr = (item.magnitude !== null && !isNaN(item.magnitude)) ? item.magnitude.toFixed(2) : (item.magLoading ? '...' : 'N/A');
 
         let row = [
           item.telescope,
           item.oid,
           classStr,
-          isNaN(item.magnitude) ? '' : item.magnitude.toFixed(2),
+          magStr,
           filterStr,
           item.ra.toFixed(6),
           item.dec.toFixed(6),
