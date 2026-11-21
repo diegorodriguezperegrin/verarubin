@@ -487,6 +487,64 @@
       font-weight: 600;
     }
 
+    /* Language Selector (ES / CA / EN) */
+    .cosmos-lang-group {
+      display: inline-flex;
+      align-items: center;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      height: 28px;
+      padding: 2px 4px;
+      box-sizing: border-box;
+      gap: 2px;
+      vertical-align: middle;
+      align-self: center;
+    }
+
+    .cosmos-lang-icon {
+      color: var(--text-muted);
+      width: 14px;
+      height: 14px;
+      margin-right: 2px;
+      margin-left: 2px;
+      flex-shrink: 0;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .cosmos-lang-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0 5px;
+      height: 22px;
+      line-height: 20px;
+      border-radius: 3px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      user-select: none;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .cosmos-lang-btn:hover:not(.active) {
+      color: var(--text-color);
+      background-color: var(--hover-bg);
+    }
+
+    .cosmos-lang-btn.active {
+      background-color: var(--accent-color);
+      color: #ffffff;
+      border-color: var(--accent-color);
+    }
+
     @media (max-width: 680px) {
       .widget-header {
         flex-direction: column;
@@ -694,6 +752,9 @@
       margin: 0 !important;
     }
   </style>
+  <!-- Motor compartido de internacionalización Cosmos Mataró -->
+  <script src="cosmos_i18n.js" defer></script>
+  <script src="i18n_verarubin.js" defer></script>
 </head>
 
 <body>
@@ -712,6 +773,18 @@
         </div>
       </div>
       <div class="header-right">
+        <!-- Selector de Idioma (CA / ES / EN) -->
+        <div class="cosmos-lang-group" id="langSelector" role="group" aria-label="Idioma" data-no-i18n>
+          <svg class="cosmos-lang-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+          <button type="button" class="cosmos-lang-btn lang-btn" data-lang="ca" onclick="setLanguage('ca')" title="Català">CA</button>
+          <button type="button" class="cosmos-lang-btn lang-btn" data-lang="es" onclick="setLanguage('es')" title="Castellano">ES</button>
+          <button type="button" class="cosmos-lang-btn lang-btn" data-lang="en" onclick="setLanguage('en')" title="English">EN</button>
+        </div>
+
         <!-- Conmutador de Tema (#EFEDE4 / Negro) -->
         <button id="btnThemeToggle" class="btn-tool" type="button" title="Alternar color de fondo (#EFEDE4 / Negro)">
           🌙 <span id="themeLabel">Oscuro</span>
@@ -819,7 +892,7 @@
             <button id="btnCloseModal" type="button" class="btn-close-modal" title="Cerrar ventana (Esc)">&times;</button>
           </div>
         </div>
-        <div class="modal-body" id="infoContent">
+        <div class="modal-body" id="infoContent" data-i18n-block="info-content">
           <p><strong>Origen de los datos y filtrado del sistema
               <a href="https://alerce.science/" target="_blank">ALeRCE Broker</a> de los telescopios Vera Rubin/LSST y Zwicky Transient Facility (ZTF):</strong>
           </p>
@@ -930,26 +1003,18 @@
 
     // --- Utility: MJD to Local Date ---
     function formatMJD(mjd) {
-      if (!mjd) return 'Desconocida';
+      if (!mjd) return (window.CosmosI18n && window.CosmosI18n.getLang() === 'ca') ? 'Desconeguda' : ((window.CosmosI18n && window.CosmosI18n.getLang() === 'en') ? 'Unknown' : 'Desconocida');
       // Fórmula de MJD a Unix Timestamp: (MJD - 40587) * 86400000
       const unixTimeMs = (mjd - 40587.0) * 86400000;
       const date = new Date(unixTimeMs);
 
       // Formatear a estilo europeo limpio: DD/MM/YYYY HH:MM
-      const reqOpts = {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', hour12: false
-      };
-
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(today.getDate() - 1);
-
       const reqOptsDate = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' };
       const reqOptsTime = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC' };
 
-      const strDate = date.toLocaleDateString('es-ES', reqOptsDate);
-      const strTime = date.toLocaleTimeString('es-ES', reqOptsTime);
+      const locale = window.CosmosI18n ? window.CosmosI18n.getLocale() : 'es-ES';
+      const strDate = date.toLocaleDateString(locale, reqOptsDate);
+      const strTime = date.toLocaleTimeString(locale, reqOptsTime);
 
       // Usar fecha absoluta siempre en formato UTC (el sufijo va en la cabecera)
       return `${strDate} ${strTime}`;
@@ -997,15 +1062,20 @@
     const themeLabel = document.getElementById('themeLabel');
 
     function applyTheme(isLight) {
+      const lang = window.CosmosI18n ? window.CosmosI18n.getLang() : 'ca';
       if (isLight) {
         document.body.classList.add('theme-light');
-        btnThemeToggle.innerHTML = '☀️ <span id="themeLabel" style="font-size: 0.78rem;">Claro</span>';
-        btnThemeToggle.title = 'Cambiar a fondo negro';
+        const label = lang === 'ca' ? 'Clar' : (lang === 'en' ? 'Light' : 'Claro');
+        const title = lang === 'ca' ? 'Canviar a fons negre' : (lang === 'en' ? 'Switch to black background' : 'Cambiar a fondo negro');
+        btnThemeToggle.innerHTML = `☀️ <span id="themeLabel" style="font-size: 0.78rem;">${label}</span>`;
+        btnThemeToggle.title = title;
         try { localStorage.setItem('cosmos_rubin_theme', 'light'); } catch (e) {}
       } else {
         document.body.classList.remove('theme-light');
-        btnThemeToggle.innerHTML = '🌙 <span id="themeLabel" style="font-size: 0.78rem;">Oscuro</span>';
-        btnThemeToggle.title = 'Cambiar a fondo claro (#EFEDE4)';
+        const label = lang === 'ca' ? 'Fosc' : (lang === 'en' ? 'Dark' : 'Oscuro');
+        const title = lang === 'ca' ? 'Canviar a fons clar (#EFEDE4)' : (lang === 'en' ? 'Switch to light background (#EFEDE4)' : 'Cambiar a fondo claro (#EFEDE4)');
+        btnThemeToggle.innerHTML = `🌙 <span id="themeLabel" style="font-size: 0.78rem;">${label}</span>`;
+        btnThemeToggle.title = title;
         try { localStorage.setItem('cosmos_rubin_theme', 'dark'); } catch (e) {}
       }
     }
@@ -1388,7 +1458,8 @@ Glosario de clasificación:
     // Formato de solo fecha
     function formatDateOnly() {
       const date = new Date(Date.now() - (MAX_ALERT_AGE_DAYS * 86400000));
-      return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const locale = window.CosmosI18n ? window.CosmosI18n.getLocale() : 'es-ES';
+      return date.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
     async function fetchAlertsForSurvey(baseUrl, surveyName, classifier, className) {
@@ -1715,8 +1786,10 @@ Glosario de clasificación:
 
     // --- CSV Export Logic ---
     function exportToCSV() {
+      const lang = window.CosmosI18n ? window.CosmosI18n.getLang() : 'ca';
       if (rawAlertsData.length === 0) {
-        alert("No hay datos cargados para exportar.");
+        const msg = lang === 'ca' ? "No hi ha dades carregades per exportar." : (lang === 'en' ? "No data loaded to export." : "No hay datos cargados para exportar.");
+        alert(msg);
         return;
       }
 
@@ -1743,8 +1816,15 @@ Glosario de clasificación:
         return 0;
       });
 
-      // 2. Generamos Cabeceras
-      let csvContent = "Telescopio,ID_Objeto,Clasificacion,Magnitud,Filtro,Ascension_Recta,Declinacion,Fecha_UTC,MJD_Bruto\n";
+      // 2. Generamos Cabeceras según idioma
+      let csvContent = "";
+      if (lang === 'ca') {
+        csvContent = "Telescopi,ID_Objecte,Classificacio,Magnitud,Filtre,Ascensio_Recta,Declinacio,Data_UTC,MJD_Brut\n";
+      } else if (lang === 'en') {
+        csvContent = "Telescope,Object_ID,Classification,Magnitude,Filter,Right_Ascension,Declination,UTC_Date,Raw_MJD\n";
+      } else {
+        csvContent = "Telescopio,ID_Objeto,Clasificacion,Magnitud,Filtro,Ascension_Recta,Declinacion,Fecha_UTC,MJD_Bruto\n";
+      }
 
       // 3. Poblamos las filas
       exportData.forEach(item => {
@@ -1779,6 +1859,13 @@ Glosario de clasificación:
       link.click();
       document.body.removeChild(link);
     }
+
+    // Exportaciones globales para el motor i18n
+    window.renderTable = renderTable;
+    Object.defineProperty(window, 'rawAlertsData', {
+      get: () => rawAlertsData,
+      configurable: true
+    });
 
     // START
     loadData();
