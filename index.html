@@ -13,12 +13,34 @@
       --bg-color: #121212;
       --surface-color: #1e1e1e;
       --text-color: #e0e0e0;
+      --text-muted: #888888;
       --accent-color: #bb86fc;
       --border-color: #333333;
       --header-bg: #2d2d2d;
       --hover-bg: #2a2a2a;
       --btn-bg: #3700b3;
       --btn-hover: #6200ee;
+      --input-bg: #1a1a1a;
+      --input-border: #555555;
+      --title-color: #ffffff;
+      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    body.theme-light {
+      --bg-color: #EFEDE4;
+      --surface-color: #EFEDE4;
+      --text-color: #222222;
+      --text-muted: #5e5b53;
+      --accent-color: #5b289c;
+      --border-color: #cfcabc;
+      --header-bg: #dfdbce;
+      --hover-bg: #d7d2c3;
+      --btn-bg: #5b289c;
+      --btn-hover: #471e7d;
+      --input-bg: #fcfbf9;
+      --input-border: #bcb7aa;
+      --title-color: #151515;
+      --card-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
     }
 
     body {
@@ -27,6 +49,7 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     .widget-container {
@@ -36,7 +59,8 @@
       background-color: var(--surface-color);
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      box-shadow: var(--card-shadow);
+      transition: background-color 0.25s ease, box-shadow 0.25s ease;
     }
 
     .widget-header {
@@ -106,15 +130,17 @@
       text-transform: uppercase;
     }
 
-    select {
-      background-color: #1a1a1a;
+    select,
+    input[type="number"] {
+      background-color: var(--input-bg);
       color: var(--text-color);
-      border: 1px solid #555;
-      padding: 6px 12px;
+      border: 1px solid var(--input-border);
+      padding: 4px 8px;
       border-radius: 4px;
       font-family: inherit;
       font-size: 0.85rem;
       cursor: pointer;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
     }
 
     button {
@@ -126,9 +152,42 @@
       font-family: inherit;
       font-size: 0.85rem;
       cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-tool {
+      background-color: var(--header-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    .btn-tool:hover {
+      background-color: var(--hover-bg);
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    .btn-tool.active {
+      background-color: var(--accent-color);
+      color: #ffffff;
+      border-color: var(--accent-color);
     }
 
     select:focus,
+    input[type="number"]:focus,
     button:focus {
       outline: 1px solid var(--accent-color);
       border-color: var(--accent-color);
@@ -136,12 +195,18 @@
 
     button.btn-export {
       background-color: var(--btn-bg);
-      color: white;
+      color: #ffffff;
       font-weight: 600;
       border: none;
       transition: background-color 0.2s;
       align-self: flex-end;
-      height: 32px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      font-size: 0.8rem;
+      border-radius: 4px;
     }
 
     button.btn-export:hover {
@@ -182,7 +247,7 @@
     th {
       background-color: var(--header-bg);
       font-weight: 600;
-      color: #ffffff;
+      color: var(--title-color);
       user-select: none;
       vertical-align: top;
       position: relative;
@@ -279,7 +344,7 @@
 
     .toolbar-label {
       font-size: 0.75rem;
-      color: #aaa;
+      color: var(--text-muted);
       text-transform: uppercase;
       font-weight: 600;
       margin-right: 2px;
@@ -294,9 +359,9 @@
     }
 
     .chip {
-      background-color: #1e1e1e;
-      color: #888;
-      border: 1px solid #444;
+      background-color: var(--input-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
       border-radius: 14px;
       padding: 4px 10px;
       font-size: 0.78rem;
@@ -312,9 +377,9 @@
     }
 
     .chip:hover {
-      background-color: #2c2c2c;
-      color: #eee;
-      border-color: #666;
+      background-color: var(--hover-bg);
+      color: var(--text-color);
+      border-color: var(--accent-color);
     }
 
     .chip.active {
@@ -360,7 +425,9 @@
       .header-right {
         width: 100%;
         display: flex;
-        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-start;
       }
       .widget-toolbar {
         flex-direction: column;
@@ -375,12 +442,12 @@
     .no-data {
       text-align: center;
       padding: 2rem;
-      color: #888;
+      color: var(--text-muted);
       font-style: italic;
     }
 
     .mag-loading {
-      color: #777;
+      color: var(--text-muted);
       font-style: italic;
       font-size: 0.85rem;
       letter-spacing: 1px;
@@ -397,15 +464,34 @@
       text-decoration: underline;
     }
 
-    /* Explanatory Notes */
+    /* Explanatory Notes Collapsible */
     .explanatory-notes {
+      display: none;
       font-size: 0.8rem;
-      color: #999;
+      color: var(--text-muted);
       background: var(--header-bg);
-      padding: 12px;
+      padding: 14px 16px;
       border-radius: 6px;
+      border: 1px solid var(--border-color);
       border-left: 4px solid var(--accent-color);
-      line-height: 1.4;
+      line-height: 1.45;
+      margin-bottom: 1rem;
+    }
+
+    .explanatory-notes.open {
+      display: block;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .explanatory-notes p {
@@ -417,13 +503,24 @@
     }
 
     .explanatory-notes strong {
-      color: #ccc;
+      color: var(--title-color);
+    }
+
+    code {
+      background-color: var(--input-bg);
+      color: var(--accent-color);
+      padding: 1px 4px;
+      border-radius: 3px;
+      border: 1px solid var(--border-color);
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85em;
     }
 
     /* Fixed Input Height Reset */
     #limitMag,
     #coordFormat,
-    #btnExport {
+    #btnExport,
+    .btn-tool {
       box-sizing: border-box !important;
       height: 28px !important;
       margin: 0 !important;
@@ -437,24 +534,66 @@
     <!-- Header superior: Título, estado y acciones -->
     <div class="widget-header">
       <div class="header-left">
-        <h2 style="margin: 0; font-size: 1.15rem; color: #ffffff; font-weight: normal;">
-          <strong>Cosmos Mataró</strong> &bull; Descubrimientos <span id="dateHeaderInfo" style="font-size: 0.95rem; color: #bb86fc;">recientes</span>
+        <h2 style="margin: 0; font-size: 1.15rem; color: var(--title-color); font-weight: normal;">
+          <strong>Cosmos Mataró</strong> &bull; Descubrimientos <span id="dateHeaderInfo" style="font-size: 0.95rem; color: var(--accent-color);">recientes</span>
         </h2>
         <div class="status-indicator">
           <span class="status-dot" id="statusDot"></span>
           <span id="statusText">Cargando datos iniciales...</span>
-          <span id="recordCounts" style="color: #888; font-size: 0.75rem; margin-left: 6px;"></span>
+          <span id="recordCounts" style="color: var(--text-muted); font-size: 0.75rem; margin-left: 6px;"></span>
         </div>
       </div>
       <div class="header-right">
+        <!-- Conmutador de Tema (#EFEDE4 / Negro) -->
+        <button id="btnThemeToggle" class="btn-tool" type="button" title="Alternar color de fondo (#EFEDE4 / Negro)">
+          🌙 <span id="themeLabel">Oscuro</span>
+        </button>
+
+        <!-- Botón de Información ( i ) -->
+        <button id="btnInfoToggle" class="btn-tool" type="button" title="Mostrar/ocultar información técnica y glosario">
+          <strong>( i )</strong>
+        </button>
+
         <!-- Selector Formato Coordenadas -->
-        <select id="coordFormat" title="Formato Ecuatorial" style="height: 28px; background-color: #1a1a1a; color: var(--text-color); border: 1px solid #555; padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.8rem;">
+        <select id="coordFormat" title="Formato Ecuatorial">
           <option value="deg">Decimal (º)</option>
           <option value="sex">Sexagesimal</option>
         </select>
+
         <!-- Botón de exportación -->
-        <button class="btn-export" id="btnExport" title="Exportar vista actual a CSV" style="height: 28px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; font-size: 0.8rem;">Exportar CSV</button>
+        <button class="btn-export" id="btnExport" title="Exportar vista actual a CSV">Exportar CSV</button>
       </div>
+    </div>
+
+    <!-- Panel explicativo colapsable (solo se muestra al pulsar el botón ( i )) -->
+    <div class="explanatory-notes" id="infoPanel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+        <strong style="color: var(--accent-color); font-size: 0.9rem;">ℹ️ Guía e información técnica de las alertas</strong>
+        <button id="btnCloseInfo" type="button" style="background: none; border: none; color: var(--text-color); font-size: 1.2rem; cursor: pointer; padding: 0 4px; line-height: 1;" title="Cerrar panel">&times;</button>
+      </div>
+      <p><strong>Origen de los datos y filtrado local del sistema
+          <a href="https://alerce.science/" target="_blank">ALeRCE
+            Broker</a> de los telescopios Vera Rubin/LSST
+          y Zwicky Transient Facility (ZTF)</strong>
+      </p>
+      <p>Este widget evalúa hasta 500 descubrimientos en ZTF y 100 en LSST por categoría. Para garantizar el
+        rendimiento y evitar colapsar los servidores, <strong>el filtrado estricto se aplica de forma local en el
+          navegador</strong>, seleccionando los 15 descubrimientos más probables para cada una de las 6 categorías en
+        ambos telescopios (máximo de 180 alertas simultáneas). Los filtros dinámicos (como el límite de magnitud o la
+        selección de clase) actúan al instante sobre esta muestra en memoria. Toda referenciación astrométrica posicional
+        es <strong>ICRS (J2000)</strong>.
+      </p>
+      <p><strong>Estado operativo de LSST:</strong> El telescopio Vera Rubin se encuentra en fase de pruebas y
+        comisionamiento previo al inicio del sondeo rutinario. Entre campañas de observación pública, el widget muestra
+        las detecciones más recientes registradas por el broker para permitir su exploración astrométrica.</p>
+      <p><strong>Sobre los cometas:</strong> El clasificador visual (<em>Stamp Classifier</em>) agrupa por defecto
+        cualquier roca interplanetaria móvil bajo la clase <code>asteroid</code> hasta su confirmación o cruce con el
+        catálogo del MPC (Minor Planet Center).</p>
+      <p><strong>Glosario de clasificación:</strong> <code>SN</code> (Supernova - explosión estelar), <code>AGN</code>
+        (Núcleo Galáctico Activo - agujero negro supermasivo devorando materia), <code>VS</code> (Estrella Variable -
+        cambio intrínseco de brillo), <code>asteroid</code> (Asteroide / Cuerpo menor del Sistema Solar),
+        <code>satellite</code> (Traza de satélite artificial), <code>bogus</code> (Falsa alarma o artefacto
+        instrumental).</p>
     </div>
 
     <!-- Barra de filtros interactivos con Chips -->
@@ -472,7 +611,7 @@
       </div>
       <div class="toolbar-group mag-group" style="display: flex; align-items: center; gap: 6px;">
         <label for="limitMag" class="toolbar-label">&le; Mag:</label>
-        <input type="number" id="limitMag" value="21" step="0.5" style="box-sizing: border-box; width: 62px; height: 28px; background-color: #1a1a1a; color: var(--text-color); border: 1px solid #555; padding: 2px 6px; border-radius: 4px; font-family: inherit; font-size: 0.85rem;" title="&le; Límite de magnitud">
+        <input type="number" id="limitMag" value="21" step="0.5" style="width: 62px;" title="&le; Límite de magnitud">
       </div>
     </div>
 
@@ -514,32 +653,6 @@
           </tr>
         </tbody>
       </table>
-    </div>
-
-    <div class="explanatory-notes">
-      <p><strong>Origen de los datos y filtrado local del sistema
-          <a href="https://alerce.science/" target="_blank">ALeRCE
-            Broker</a> de los telescopios Vera Rubin/LSST
-          y Zwicky Transient Facility (ZTF)</strong>
-      </p>
-      <p>Este widget evalúa hasta 500 descubrimientos en ZTF y 100 en LSST por categoría. Para garantizar el
-        rendimiento y evitar colapsar los servidores, <strong>el filtrado estricto se aplica de forma local en el
-          navegador</strong>, seleccionando los 15 descubrimientos más probables para cada una de las 6 categorías en
-        ambos telescopios (máximo de 180 alertas simultáneas). Los filtros dinámicos (como el límite de magnitud o la
-        selección de clase) actúan al instante sobre esta muestra en memoria. Toda referenciación astrométrica posicional
-        es <strong>ICRS (J2000)</strong>.
-      </p>
-      <p><strong>Estado operativo de LSST</strong> El telescopio Vera Rubin se encuentra en fase de pruebas y
-        comisionamiento previo al inicio del sondeo rutinario. Entre campañas de observación pública, el widget muestra
-        las detecciones más recientes registradas por el broker para permitir su exploración astrométrica.</p>
-      <p><strong>Sobre los cometas</strong> El clasificador visual (<em>Stamp Classifier</em>) agrupa por defecto
-        cualquier roca interplanetaria móvil bajo la clase <code>asteroid</code> hasta su confirmación o cruce con el
-        catálogo del MPC (Minor Planet Center).</p>
-      <p><strong>Glosario de clasificación</strong> <code>SN</code> (Supernova - explosión estelar), <code>AGN</code>
-        (Núcleo Galáctico Activo - agujero negro supermasivo devorando materia), <code>VS</code> (Estrella Variable -
-        cambio intrínseco de brillo), <code>asteroid</code> (Asteroide / Cuerpo menor del Sistema Solar),
-        <code>satellite</code> (Traza de satélite artificial), <code>bogus</code> (Falsa alarma o artefacto
-        instrumental).</p>
     </div>
 
   </div>
@@ -660,6 +773,56 @@
     limitMagInput.addEventListener('input', renderTable); // Instant filter logic
     coordFormatSelect.addEventListener('change', renderTable);
     btnExport.addEventListener('click', exportToCSV);
+
+    // --- Theme Switcher Logic (#EFEDE4 <-> Negro) ---
+    const btnThemeToggle = document.getElementById('btnThemeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+
+    function applyTheme(isLight) {
+      if (isLight) {
+        document.body.classList.add('theme-light');
+        btnThemeToggle.innerHTML = '☀️ <span id="themeLabel" style="font-size: 0.78rem;">Claro</span>';
+        btnThemeToggle.title = 'Cambiar a fondo negro';
+        try { localStorage.setItem('cosmos_rubin_theme', 'light'); } catch (e) {}
+      } else {
+        document.body.classList.remove('theme-light');
+        btnThemeToggle.innerHTML = '🌙 <span id="themeLabel" style="font-size: 0.78rem;">Oscuro</span>';
+        btnThemeToggle.title = 'Cambiar a fondo claro (#EFEDE4)';
+        try { localStorage.setItem('cosmos_rubin_theme', 'dark'); } catch (e) {}
+      }
+    }
+
+    btnThemeToggle.addEventListener('click', () => {
+      const isLight = !document.body.classList.contains('theme-light');
+      applyTheme(isLight);
+    });
+
+    try {
+      if (localStorage.getItem('cosmos_rubin_theme') === 'light') {
+        applyTheme(true);
+      }
+    } catch (e) {}
+
+    // --- Info Panel Logic (Botón ( i )) ---
+    const btnInfoToggle = document.getElementById('btnInfoToggle');
+    const infoPanel = document.getElementById('infoPanel');
+    const btnCloseInfo = document.getElementById('btnCloseInfo');
+
+    function toggleInfoPanel(force) {
+      const shouldOpen = force !== undefined ? force : !infoPanel.classList.contains('open');
+      if (shouldOpen) {
+        infoPanel.classList.add('open');
+        btnInfoToggle.classList.add('active');
+      } else {
+        infoPanel.classList.remove('open');
+        btnInfoToggle.classList.remove('active');
+      }
+    }
+
+    btnInfoToggle.addEventListener('click', () => toggleInfoPanel());
+    if (btnCloseInfo) {
+      btnCloseInfo.addEventListener('click', () => toggleInfoPanel(false));
+    }
 
     // --- Actions ---
     function handleSort(col) {
@@ -1258,7 +1421,7 @@
             <a href="https://aladin.cds.unistra.fr/AladinLite/?target=${alert.ra}%20${alert.dec}&fov=0.1" target="_blank" rel="noopener noreferrer" style="color: var(--accent-color); text-decoration: none;" title="Abrir simulador del cielo (Aladin)">${formatDec(alert.dec)}</a>
             <span style="cursor:pointer; margin-left:6px; font-size:0.9rem; opacity:0.7; vertical-align: middle;" onclick="copyCoordsForStellarium(${alert.ra}, ${alert.dec}, this)" title="Copiar coordenadas juntas para pegar en buscador de Stellarium">&#128203;</span>
           </td>
-          <td style="font-size: 0.85rem; color: #fff;">${formatMJD(alert.mjd)}</td>
+          <td style="font-size: 0.85rem; color: var(--text-color);">${formatMJD(alert.mjd)}</td>
         `;
         tbody.appendChild(tr);
       });
