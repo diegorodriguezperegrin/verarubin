@@ -99,6 +99,8 @@
 
     // Estados y tooltips de tabla
     'Cargando alertas desde ALeRCE...': 'Carregant alertes des d\'ALeRCE...',
+    'No se encontraron alertas recientes en ALeRCE.': 'No s\'han trobat alertes recents a ALeRCE.',
+    'Error al cargar datos remotos. Reintentando en el próximo ciclo...': 'Error en carregar dades remotes. Reintentant en el proper cicle...',
     'Obteniendo magnitud...': 'Obtenint magnitud...',
     'Obteniendo filtro...': 'Obtenint filtre...',
     'El explorador visual de ALeRCE aún no está disponible públicamente para objetos LSST': 'L\'explorador visual d\'ALeRCE encara no està disponible públicament per a objectes LSST',
@@ -180,6 +182,8 @@
 
     // Estados y tooltips de tabla
     'Cargando alertas desde ALeRCE...': 'Loading alerts from ALeRCE...',
+    'No se encontraron alertas recientes en ALeRCE.': 'No recent alerts found in ALeRCE.',
+    'Error al cargar datos remotos. Reintentando en el próximo ciclo...': 'Error loading remote data. Retrying in next cycle...',
     'Obteniendo magnitud...': 'Fetching magnitude...',
     'Obteniendo filtro...': 'Fetching filter...',
     'El explorador visual de ALeRCE aún no está disponible públicamente para objetos LSST': 'ALeRCE visual explorer is not yet publicly available for LSST objects',
@@ -238,19 +242,19 @@
       },
       onApply: function (lang) {
         // Actualizar etiqueta del conmutador de tema respetando el idioma
-        const isLight = document.body && document.body.classList ? document.body.classList.contains('theme-light') : false;
+        const isDark = document.body && document.body.classList ? document.body.classList.contains('theme-dark') : false;
         const themeLabel = document.getElementById('themeLabel');
         const btnThemeToggle = document.getElementById('btnThemeToggle');
         if (themeLabel) {
-          if (isLight) {
-            themeLabel.textContent = lang === 'ca' ? 'Clar' : (lang === 'en' ? 'Light' : 'Claro');
-            if (btnThemeToggle) {
-              btnThemeToggle.title = lang === 'ca' ? 'Canviar a fons negre' : (lang === 'en' ? 'Switch to black background' : 'Cambiar a fondo negro');
-            }
-          } else {
+          if (isDark) {
             themeLabel.textContent = lang === 'ca' ? 'Fosc' : (lang === 'en' ? 'Dark' : 'Oscuro');
             if (btnThemeToggle) {
               btnThemeToggle.title = lang === 'ca' ? 'Canviar a fons clar (#EFEDE4)' : (lang === 'en' ? 'Switch to light background (#EFEDE4)' : 'Cambiar a fondo claro (#EFEDE4)');
+            }
+          } else {
+            themeLabel.textContent = lang === 'ca' ? 'Clar' : (lang === 'en' ? 'Light' : 'Claro');
+            if (btnThemeToggle) {
+              btnThemeToggle.title = lang === 'ca' ? 'Canviar a fons negre' : (lang === 'en' ? 'Switch to black background' : 'Cambiar a fondo negro');
             }
           }
         }

@@ -10,23 +10,6 @@
   <title>Alertas Astronómicas ALeRCE</title>
   <style>
     :root {
-      --bg-color: #121212;
-      --surface-color: #1e1e1e;
-      --text-color: #e0e0e0;
-      --text-muted: #888888;
-      --accent-color: #bb86fc;
-      --border-color: #333333;
-      --header-bg: #2d2d2d;
-      --hover-bg: #2a2a2a;
-      --btn-bg: #3700b3;
-      --btn-hover: #6200ee;
-      --input-bg: #1a1a1a;
-      --input-border: #555555;
-      --title-color: #ffffff;
-      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    body.theme-light {
       --bg-color: #EFEDE4;
       --surface-color: #EFEDE4;
       --text-color: #222222;
@@ -41,6 +24,23 @@
       --input-border: #bcb7aa;
       --title-color: #151515;
       --card-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+    }
+
+    body.theme-dark {
+      --bg-color: #121212;
+      --surface-color: #1e1e1e;
+      --text-color: #e0e0e0;
+      --text-muted: #888888;
+      --accent-color: #bb86fc;
+      --border-color: #333333;
+      --header-bg: #2d2d2d;
+      --hover-bg: #2a2a2a;
+      --btn-bg: #3700b3;
+      --btn-hover: #6200ee;
+      --input-bg: #1a1a1a;
+      --input-border: #555555;
+      --title-color: #ffffff;
+      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
     body {
@@ -82,9 +82,10 @@
     .status-indicator {
       font-size: 0.85rem;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 6px;
-      margin-top: 4px;
+      margin-top: 6px;
     }
 
     .status-dot {
@@ -557,6 +558,10 @@
         gap: 8px;
         justify-content: flex-start;
       }
+      .status-indicator {
+        font-size: 0.82rem;
+        margin-top: 6px;
+      }
       .widget-toolbar {
         flex-direction: column;
         align-items: flex-start;
@@ -568,13 +573,25 @@
         gap: 8px;
         justify-content: space-between;
       }
+      .no-data {
+        padding: 2rem 20px;
+      }
+      .no-data-text {
+        left: 20px;
+      }
     }
 
     .no-data {
-      text-align: center;
-      padding: 2rem;
+      text-align: left;
+      padding: 2.2rem 28px;
       color: var(--text-muted);
       font-style: italic;
+    }
+
+    .no-data-text {
+      display: inline-block;
+      position: sticky;
+      left: 28px;
     }
 
     .mag-loading {
@@ -602,7 +619,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(30, 25, 20, 0.45);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       z-index: 9999;
@@ -616,8 +633,8 @@
       transition: opacity 0.2s ease, visibility 0.2s ease;
     }
 
-    body.theme-light .modal-overlay {
-      background: rgba(30, 25, 20, 0.45);
+    body.theme-dark .modal-overlay {
+      background: rgba(0, 0, 0, 0.65);
     }
 
     .modal-overlay.open {
@@ -635,14 +652,14 @@
       max-height: 85vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
       transform: translateY(12px) scale(0.98);
       transition: transform 0.2s ease;
       overflow: hidden;
     }
 
-    body.theme-light .modal-card {
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+    body.theme-dark .modal-card {
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
     }
 
     .modal-overlay.open .modal-card {
@@ -786,8 +803,8 @@
         </div>
 
         <!-- Conmutador de Tema (#EFEDE4 / Negro) -->
-        <button id="btnThemeToggle" class="btn-tool" type="button" title="Alternar color de fondo (#EFEDE4 / Negro)">
-          🌙 <span id="themeLabel">Oscuro</span>
+        <button id="btnThemeToggle" class="btn-tool" type="button" title="Cambiar a fondo negro">
+          ☀️ <span id="themeLabel">Claro</span>
         </button>
 
         <!-- Botón de Información Estándar -->
@@ -867,7 +884,7 @@
         </thead>
         <tbody id="alertsTableBody">
           <tr>
-            <td colspan="8" class="no-data">Cargando alertas desde ALeRCE...</td>
+            <td colspan="8" class="no-data"><span class="no-data-text">Cargando alertas desde ALeRCE...</span></td>
           </tr>
         </tbody>
       </table>
@@ -1061,32 +1078,32 @@
     const btnThemeToggle = document.getElementById('btnThemeToggle');
     const themeLabel = document.getElementById('themeLabel');
 
-    function applyTheme(isLight) {
+    function applyTheme(isDark) {
       const lang = window.CosmosI18n ? window.CosmosI18n.getLang() : 'ca';
-      if (isLight) {
-        document.body.classList.add('theme-light');
-        const label = lang === 'ca' ? 'Clar' : (lang === 'en' ? 'Light' : 'Claro');
-        const title = lang === 'ca' ? 'Canviar a fons negre' : (lang === 'en' ? 'Switch to black background' : 'Cambiar a fondo negro');
-        btnThemeToggle.innerHTML = `☀️ <span id="themeLabel" style="font-size: 0.78rem;">${label}</span>`;
-        btnThemeToggle.title = title;
-        try { localStorage.setItem('cosmos_rubin_theme', 'light'); } catch (e) {}
-      } else {
-        document.body.classList.remove('theme-light');
+      if (isDark) {
+        document.body.classList.add('theme-dark');
         const label = lang === 'ca' ? 'Fosc' : (lang === 'en' ? 'Dark' : 'Oscuro');
         const title = lang === 'ca' ? 'Canviar a fons clar (#EFEDE4)' : (lang === 'en' ? 'Switch to light background (#EFEDE4)' : 'Cambiar a fondo claro (#EFEDE4)');
         btnThemeToggle.innerHTML = `🌙 <span id="themeLabel" style="font-size: 0.78rem;">${label}</span>`;
         btnThemeToggle.title = title;
         try { localStorage.setItem('cosmos_rubin_theme', 'dark'); } catch (e) {}
+      } else {
+        document.body.classList.remove('theme-dark');
+        const label = lang === 'ca' ? 'Clar' : (lang === 'en' ? 'Light' : 'Claro');
+        const title = lang === 'ca' ? 'Canviar a fons negre' : (lang === 'en' ? 'Switch to black background' : 'Cambiar a fondo negro');
+        btnThemeToggle.innerHTML = `☀️ <span id="themeLabel" style="font-size: 0.78rem;">${label}</span>`;
+        btnThemeToggle.title = title;
+        try { localStorage.setItem('cosmos_rubin_theme', 'light'); } catch (e) {}
       }
     }
 
     btnThemeToggle.addEventListener('click', () => {
-      const isLight = !document.body.classList.contains('theme-light');
-      applyTheme(isLight);
+      const isDark = !document.body.classList.contains('theme-dark');
+      applyTheme(isDark);
     });
 
     try {
-      if (localStorage.getItem('cosmos_rubin_theme') === 'light') {
+      if (localStorage.getItem('cosmos_rubin_theme') === 'dark') {
         applyTheme(true);
       }
     } catch (e) {}
@@ -1688,7 +1705,7 @@ Glosario de clasificación:
 
         if (session === currentLoadSession) {
           if (rawAlertsData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="no-data">No se encontraron alertas recientes en ALeRCE.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="no-data"><span class="no-data-text">No se encontraron alertas recientes en ALeRCE.</span></td></tr>';
             updateStatus(false, 'Sin alertas recientes');
           } else if (completedMagCount >= totalMagCount) {
             const now = new Date();
@@ -1700,7 +1717,7 @@ Glosario de clasificación:
 
       } catch (err) {
         console.error('Error general de actualización:', err);
-        tbody.innerHTML = '<tr><td colspan="8" class="no-data">Error al cargar datos remotos. Reintentando en el próximo ciclo...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data"><span class="no-data-text">Error al cargar datos remotos. Reintentando en el próximo ciclo...</span></td></tr>';
         updateStatus(false, 'Error de conexión');
       }
     }
@@ -1739,7 +1756,7 @@ Glosario de clasificación:
       tbody.innerHTML = '';
       if (displayData.length === 0) {
         const currentMagLimit = limitMagInput.value || 21;
-        tbody.innerHTML = `<tr><td colspan="8" class="no-data">No hay alertas visibles con los filtros actuales (Mag &le; ${currentMagLimit}).</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="no-data"><span class="no-data-text">No hay alertas visibles con los filtros actuales (Mag &le; ${currentMagLimit}).</span></td></tr>`;
         return;
       }
 
